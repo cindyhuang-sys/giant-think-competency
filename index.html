@@ -473,21 +473,26 @@ let currentUserRole = null;
           <div class="card-title">面試關卡</div>
           <div class="round-tabs">
             <button class="round-tab active" id="round-btn-1" onclick="switchRound(1)">第一關面試</button>
-            <button class="round-tab" id="round-btn-2" onclick="switchRound(2)">第二關面試</button>
-            <button class="round-tab" id="round-btn-3" onclick="switchRound(3)">HR 面試</button>
+            <button class="round-tab" id="round-btn-2" onclick="switchRound(2)">第二關面試 <span style="font-size:10px;opacity:.6">（選填）</span></button>
+            <button class="round-tab" id="round-btn-3" onclick="switchRound(3)">HR 面試 <span style="font-size:10px;opacity:.6">（僅評語）</span></button>
           </div>
           <div id="round-panel">
             <div class="form-row">
               <div class="form-group"><label class="form-label">面試日期</label><input type="text" id="r-date" placeholder="YYYY/MM/DD" oninput="syncRound()"></div>
               <div class="form-group"><label class="form-label">面試官</label><input type="text" id="r-interviewer" placeholder="填入姓名" oninput="syncRound()"></div>
             </div>
-            <div class="score-legend">
-              <div class="sl-item"><div class="sl-dot pv-s1">1</div>待發展</div>
-              <div class="sl-item"><div class="sl-dot pv-s2">2</div>發展中</div>
-              <div class="sl-item"><div class="sl-dot pv-s3">3</div>符合期待</div>
-              <div class="sl-item"><div class="sl-dot pv-s4">4</div>超越期待</div>
+            <div id="score-section">
+              <div class="score-legend">
+                <div class="sl-item"><div class="sl-dot pv-s1">1</div>待發展</div>
+                <div class="sl-item"><div class="sl-dot pv-s2">2</div>發展中</div>
+                <div class="sl-item"><div class="sl-dot pv-s3">3</div>符合期待</div>
+                <div class="sl-item"><div class="sl-dot pv-s4">4</div>超越期待</div>
+              </div>
+              <div id="score-rows"></div>
             </div>
-            <div id="score-rows"></div>
+            <div id="hr-notice" style="display:none;padding:12px 14px;background:var(--gold-lt);border:1px solid rgba(245,158,11,.2);border-radius:var(--r);font-size:12px;color:var(--gold);margin-bottom:14px">
+              💡 HR 面試著重文化適配與職涯動機，不需填寫技能評分，請直接填寫整體評語與推薦結果。
+            </div>
             <div style="margin-top:14px" class="form-group"><label class="form-label">本關整體評語</label><textarea id="r-comment" rows="3" placeholder="面試觀察、整體印象..." oninput="syncRound()"></textarea></div>
             <div class="form-group"><label class="form-label">推薦結果</label><select id="r-result" onchange="syncRound()"><option value="">請選擇</option><option>推薦進下一關</option><option>保留觀察</option><option>不推薦</option><option>錄取</option></select></div>
           </div>
