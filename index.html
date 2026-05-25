@@ -275,117 +275,61 @@ textarea{resize:vertical;min-height:68px}
 <!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ══ Supabase 連線設定 ══════════════════════════════════
-const SUPABASE_URL  = '貼上你的 Project URL';
-const SUPABASE_KEY  = '貼上你的 anon public key';
+const SUPABASE_URL = 'https://eybbqxawjnqrftuxvqbi.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5YmJxeGF3am5xcmZ0dXh2cWJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwOTMyMjUsImV4cCI6MjA5NDY2OTIyNX0.TisWTp4p5OVPuaJemYypUZA_v3lSCTTS1IWGuibFC9g';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 let currentUser = null;
 let currentUserRole = null;
 </script>
 </head>
 <body>
-  <!-- 登入頁 -->
-<div id="login-page" style="
-  position:fixed;inset:0;background:#FAFAF8;
-  display:flex;align-items:center;justify-content:center;z-index:1000">
-  <div style="
-    background:#FFF;border:1px solid #E2DDD8;border-radius:16px;
-    padding:40px;width:380px;box-shadow:0 4px 20px rgba(0,0,0,.08)">
-    <div style="font-family:'Noto Serif TC',serif;font-size:22px;font-weight:700;
-      color:#1C1917;margin-bottom:6px">巨<span style="color:#F59E0B">思</span> · 職能盤點</div>
-    <div style="font-size:13px;color:#A8A29E;margin-bottom:28px">請登入您的帳號</div>
-
-    <div id="login-error" style="
-      display:none;background:#FEF2F2;border:1px solid #FECACA;
-      border-radius:8px;padding:10px 14px;font-size:13px;color:#B91C1C;
-      margin-bottom:16px"></div>
-
-    <div style="margin-bottom:14px">
-      <label style="font-size:11px;font-weight:600;color:#A8A29E;
-        text-transform:uppercase;letter-spacing:.4px;display:block;
-        margin-bottom:5px">電子郵件</label>
-      <input type="email" id="login-email"
-        placeholder="your@email.com"
-        style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;
-        border-radius:8px;font-family:inherit;font-size:13px;outline:none">
-    </div>
-    <div style="margin-bottom:20px">
-      <label style="font-size:11px;font-weight:600;color:#A8A29E;
-        text-transform:uppercase;letter-spacing:.4px;display:block;
-        margin-bottom:5px">密碼</label>
-      <input type="password" id="login-password"
-        placeholder="••••••••"
-        style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;
-        border-radius:8px;font-family:inherit;font-size:13px;outline:none"
-        onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <button onclick="doLogin()" style="
-      width:100%;padding:11px;background:#1C1917;color:#FFF;
-      border:none;border-radius:8px;font-family:inherit;font-size:14px;
-      font-weight:600;cursor:pointer">登入</button>
-
-    <div style="text-align:center;margin-top:14px">
-      <span style="font-size:12px;color:#A8A29E">還沒有帳號？</span>
-      <span onclick="showRegister()" style="
-        font-size:12px;color:#1E3A8A;cursor:pointer;text-decoration:underline;
-        margin-left:4px">申請帳號</span>
-    </div>
-  </div>
-</div>
-
-<!-- 申請帳號頁（預設隱藏）-->
-<div id="register-page" style="
-  position:fixed;inset:0;background:#FAFAF8;
-  display:none;align-items:center;justify-content:center;z-index:1000">
-  <div style="
-    background:#FFF;border:1px solid #E2DDD8;border-radius:16px;
-    padding:40px;width:380px;box-shadow:0 4px 20px rgba(0,0,0,.08)">
-    <div style="font-family:'Noto Serif TC',serif;font-size:18px;font-weight:700;
-      color:#1C1917;margin-bottom:20px">申請帳號</div>
-
-    <div id="register-error" style="
-      display:none;background:#FEF2F2;border:1px solid #FECACA;
-      border-radius:8px;padding:10px 14px;font-size:13px;color:#B91C1C;
-      margin-bottom:16px"></div>
-    <div id="register-success" style="
-      display:none;background:#F0FDF4;border:1px solid #BBF7D0;
-      border-radius:8px;padding:10px 14px;font-size:13px;color:#166534;
-      margin-bottom:16px"></div>
-
-    <div style="margin-bottom:12px">
-      <label style="font-size:11px;font-weight:600;color:#A8A29E;
-        text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px">姓名</label>
-      <input type="text" id="reg-name" placeholder="王小明"
-        style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;
-        border-radius:8px;font-family:inherit;font-size:13px;outline:none">
-    </div>
-    <div style="margin-bottom:12px">
-      <label style="font-size:11px;font-weight:600;color:#A8A29E;
-        text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px">電子郵件</label>
-      <input type="email" id="reg-email" placeholder="your@email.com"
-        style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;
-        border-radius:8px;font-family:inherit;font-size:13px;outline:none">
-    </div>
-    <div style="margin-bottom:20px">
-      <label style="font-size:11px;font-weight:600;color:#A8A29E;
-        text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px">密碼</label>
-      <input type="password" id="reg-password" placeholder="至少 6 個字元"
-        style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;
-        border-radius:8px;font-family:inherit;font-size:13px;outline:none">
-    </div>
-    <button onclick="doRegister()" style="
-      width:100%;padding:11px;background:#1C1917;color:#FFF;
-      border:none;border-radius:8px;font-family:inherit;font-size:14px;
-      font-weight:600;cursor:pointer;margin-bottom:10px">申請</button>
-    <button onclick="showLogin()" style="
-      width:100%;padding:9px;background:transparent;color:#6B6460;
-      border:1px solid #E2DDD8;border-radius:8px;font-family:inherit;
-      font-size:13px;cursor:pointer">← 返回登入</button>
-  </div>
-</div>
 
 <!-- NAV -->
+
+<!-- 登入頁 -->
+<div id="login-page" style="position:fixed;inset:0;background:#FAFAF8;display:flex;align-items:center;justify-content:center;z-index:1000">
+  <div style="background:#FFF;border:1px solid #E2DDD8;border-radius:16px;padding:40px;width:380px;max-width:90vw;box-shadow:0 4px 20px rgba(0,0,0,.08)">
+    <div style="font-family:'Noto Serif TC',serif;font-size:22px;font-weight:700;color:#1C1917;margin-bottom:6px">巨<span style="color:#F59E0B">思</span> · 職能盤點</div>
+    <div style="font-size:13px;color:#A8A29E;margin-bottom:28px">請登入您的帳號</div>
+    <div id="login-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;font-size:13px;color:#B91C1C;margin-bottom:16px"></div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:600;color:#A8A29E;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px">電子郵件</label>
+      <input type="email" id="login-email" placeholder="your@email.com" style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:20px">
+      <label style="font-size:11px;font-weight:600;color:#A8A29E;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px">密碼</label>
+      <input type="password" id="login-password" placeholder="••••••••" style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button onclick="doLogin()" style="width:100%;padding:11px;background:#1C1917;color:#FFF;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">登入</button>
+    <div style="text-align:center;margin-top:14px">
+      <span style="font-size:12px;color:#A8A29E">還沒有帳號？</span>
+      <span onclick="showRegister()" style="font-size:12px;color:#1E3A8A;cursor:pointer;text-decoration:underline;margin-left:4px">申請帳號</span>
+    </div>
+  </div>
+</div>
+
+<!-- 申請帳號頁 -->
+<div id="register-page" style="position:fixed;inset:0;background:#FAFAF8;display:none;align-items:center;justify-content:center;z-index:1000">
+  <div style="background:#FFF;border:1px solid #E2DDD8;border-radius:16px;padding:40px;width:380px;max-width:90vw;box-shadow:0 4px 20px rgba(0,0,0,.08)">
+    <div style="font-family:'Noto Serif TC',serif;font-size:18px;font-weight:700;color:#1C1917;margin-bottom:20px">申請帳號</div>
+    <div id="register-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;font-size:13px;color:#B91C1C;margin-bottom:16px"></div>
+    <div id="register-success" style="display:none;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:10px 14px;font-size:13px;color:#166534;margin-bottom:16px"></div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:#A8A29E;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px">姓名</label>
+      <input type="text" id="reg-name" placeholder="王小明" style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:#A8A29E;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px">電子郵件</label>
+      <input type="email" id="reg-email" placeholder="your@email.com" style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:20px">
+      <label style="font-size:11px;font-weight:600;color:#A8A29E;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px">密碼</label>
+      <input type="password" id="reg-password" placeholder="至少 6 個字元" style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box">
+    </div>
+    <button onclick="doRegister()" style="width:100%;padding:11px;background:#1C1917;color:#FFF;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:10px">申請</button>
+    <button onclick="showLogin()" style="width:100%;padding:9px;background:transparent;color:#6B6460;border:1px solid #E2DDD8;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer">← 返回登入</button>
+  </div>
+</div>
 <nav class="nav">
   <div class="nav-brand">巨<span>思</span> · 職能盤點</div>
   <div class="nav-track">
@@ -400,9 +344,7 @@ let currentUserRole = null;
     <button class="nav-step" id="pill-3" onclick="goTo(3)">試用期考核</button>
     <button class="nav-step" id="pill-4" onclick="goTo(4)">考核報告</button>
   </div>
-  <div class="nav-right">
-    <span id="nav-user" style="font-size:12px;color:rgba(255,255,255,.5);margin-right:4px"></span>
-<button class="nav-btn" onclick="doLogout()">登出</button>
+  <div class="nav-right"><span id="nav-user" style="font-size:12px;color:rgba(255,255,255,.5);margin-right:4px"></span><button class="nav-btn" onclick="doLogout()">登出</button>
     <button class="nav-btn" onclick="exportData()">↓ 匯出存檔</button>
     <button class="nav-btn primary" onclick="document.getElementById('import-input').click()">↑ 載入紀錄</button>
     <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
@@ -555,7 +497,7 @@ let currentUserRole = null;
       <div class="btn-group">
         <button class="btn btn-secondary" onclick="goTo(1)">← 返回</button>
         <div class="btn-group-right">
-          <button class="btn btn-ghost" onclick="goTo('r')">產出面試報告</button><button class="btn btn-ghost" onclick="saveInterview()">💾 儲存紀錄</button>
+          <button class="btn btn-ghost" onclick="saveInterview()">💾 儲存面試紀錄</button><button class="btn btn-ghost" onclick="goTo('r')">產出面試報告</button>
           <button class="btn btn-primary" onclick="goTo(3)">前往試用期考核 →</button>
         </div>
       </div>
@@ -642,9 +584,8 @@ let currentUserRole = null;
       </div>
 
       <div class="btn-group">
-        <button class="btn btn-ghost" onclick="saveProbation()">💾 儲存考核</button>
         <button class="btn btn-secondary" onclick="goTo('r')">← 返回面試報告</button>
-        <button class="btn btn-primary" onclick="goTo(4)">產出考核報告 →</button>
+        <button class="btn btn-ghost" onclick="saveProbation()">💾 儲存考核紀錄</button><button class="btn btn-primary" onclick="goTo(4)">產出考核報告 →</button>
       </div>
     </div>
 
@@ -1907,295 +1848,237 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el) el.addEventListener('change', syncProbation);
   });
 });
-// ══ 登入 / 登出 ════════════════════════════════════════
+
+
+// ══ 登入 / 登出 ════════════════════════════════════════════════
 function showLogin(){
-  document.getElementById('login-page').style.display = 'flex';
-  document.getElementById('register-page').style.display = 'none';
+  document.getElementById('login-page').style.display='flex';
+  document.getElementById('register-page').style.display='none';
 }
 function showRegister(){
-  document.getElementById('login-page').style.display = 'none';
-  document.getElementById('register-page').style.display = 'flex';
+  document.getElementById('login-page').style.display='none';
+  document.getElementById('register-page').style.display='flex';
 }
 
 async function doLogin(){
-  const email    = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  const errEl    = document.getElementById('login-error');
-  errEl.style.display = 'none';
-
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) {
-    errEl.textContent = '登入失敗：' + (error.message === 'Invalid login credentials' ? '信箱或密碼錯誤' : error.message);
-    errEl.style.display = 'block';
-    return;
+  const email=document.getElementById('login-email').value.trim();
+  const password=document.getElementById('login-password').value;
+  const errEl=document.getElementById('login-error');
+  errEl.style.display='none';
+  if(!email||!password){errEl.textContent='請填寫信箱與密碼';errEl.style.display='block';return;}
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error){
+    errEl.textContent='登入失敗：'+(error.message==='Invalid login credentials'?'信箱或密碼錯誤':error.message);
+    errEl.style.display='block';return;
   }
   await initApp(data.user);
 }
 
 async function doRegister(){
-  const name     = document.getElementById('reg-name').value.trim();
-  const email    = document.getElementById('reg-email').value.trim();
-  const password = document.getElementById('reg-password').value;
-  const errEl    = document.getElementById('register-error');
-  const sucEl    = document.getElementById('register-success');
-  errEl.style.display = 'none'; sucEl.style.display = 'none';
-
-  if (!name || !email || !password) {
-    errEl.textContent = '請填寫所有欄位'; errEl.style.display = 'block'; return;
-  }
-  const { error } = await sb.auth.signUp({
-    email, password,
-    options: { data: { name } }
-  });
-  if (error) {
-    errEl.textContent = '申請失敗：' + error.message; errEl.style.display = 'block'; return;
-  }
-  sucEl.textContent = '申請成功！請檢查信箱並點擊驗證連結，再回來登入。';
-  sucEl.style.display = 'block';
+  const name=document.getElementById('reg-name').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const password=document.getElementById('reg-password').value;
+  const errEl=document.getElementById('register-error');
+  const sucEl=document.getElementById('register-success');
+  errEl.style.display='none';sucEl.style.display='none';
+  if(!name||!email||!password){errEl.textContent='請填寫所有欄位';errEl.style.display='block';return;}
+  if(password.length<6){errEl.textContent='密碼至少需要 6 個字元';errEl.style.display='block';return;}
+  const {error}=await sb.auth.signUp({email,password,options:{data:{name}}});
+  if(error){errEl.textContent='申請失敗：'+error.message;errEl.style.display='block';return;}
+  sucEl.textContent='申請成功！請檢查信箱並點擊驗證連結，再回來登入。';
+  sucEl.style.display='block';
 }
 
 async function doLogout(){
   await sb.auth.signOut();
-  currentUser = null; currentUserRole = null;
-  DB = { jobs: [] }; CJ = null;
-  document.getElementById('nav-user').textContent = '';
-  renderJobList();
+  currentUser=null;currentUserRole=null;
+  DB={jobs:[]};CJ=null;
+  document.getElementById('nav-user').textContent='';
+  renderJobList();goTo(0);
   showLogin();
 }
 
 async function initApp(user){
-  currentUser = user;
-  // 取得角色
-  const { data: roleData } = await sb.from('user_roles').select('*').eq('id', user.id).single();
-  currentUserRole = roleData?.role || 'manager';
-  document.getElementById('login-page').style.display = 'none';
-  document.getElementById('register-page').style.display = 'none';
-  document.getElementById('nav-user').textContent =
-    (roleData?.name || user.email) + (currentUserRole === 'hr' ? ' · HR' : ' · 主管');
+  currentUser=user;
+  const {data:roleData}=await sb.from('user_roles').select('*').eq('id',user.id).single();
+  currentUserRole=roleData?.role||'manager';
+  document.getElementById('login-page').style.display='none';
+  document.getElementById('register-page').style.display='none';
+  document.getElementById('nav-user').textContent=(roleData?.name||user.email)+(currentUserRole==='hr'?' · HR':' · 主管');
   await loadAllJobs();
 }
 
-// ══ 資料讀寫（取代原本的本機 DB 操作）══════════════════
+// ══ 資料讀寫 ═════════════════════════════════════════════════════
 async function loadAllJobs(){
   showToast('載入資料中…');
-  const { data, error } = await sb.from('jobs').select('*').order('created_at', { ascending: false });
-  if (error) { showToast('載入失敗：' + error.message); return; }
-
-  DB.jobs = (data || []).map(j => ({
+  const {data,error}=await sb.from('jobs').select('*').order('created_at',{ascending:false});
+  if(error){showToast('載入失敗：'+error.message);return;}
+  DB.jobs=(data||[]).map(j=>({
     ...j,
-    selSkills:    new Set(j.sel_skills    || []),
-    customSkills: j.custom_skills || [],
-    applicants:   [],          // 按需載入
-    probation:    null
+    selSkills:new Set(j.sel_skills||[]),
+    customSkills:j.custom_skills||[],
+    applicants:[],probation:null
   }));
-
-  CJ = DB.jobs.length ? 0 : null;
+  CJ=DB.jobs.length?0:null;
   renderJobList();
-  if (CJ !== null) { loadJobToForm(); goTo(1); }
-  else { goTo(0); }
+  if(CJ!==null){loadJobToForm();goTo(1);}
+  else goTo(0);
   showToast('');
 }
 
 async function saveJob(){
-  const j = curJob(); if (!j) return;
-  const payload = {
-    title:         j.title || '',
-    dept:          j.dept  || '',
-    series:        j.series,
-    role_key:      j.roleKey,
-    level_label:   j.level,
-    mgr_id:        currentUser.id,
-    method:        j.method || '對外徵才',
-    open_date:     j.date  || '',
-    resp_text:     j.resp  || '',
-    jd:            j.jd    || '',
-    status:        j.status || 'draft',
-    sel_skills:    j.selSkills instanceof Set ? [...j.selSkills] : (j.selSkills || []),
-    custom_skills: j.customSkills || [],
-    created_by:    currentUser.id
+  const j=curJob();if(!j)return;
+  const payload={
+    title:j.title||'',dept:j.dept||'',series:j.series,
+    role_key:j.roleKey,level_label:j.level,
+    mgr_id:currentUser.id,method:j.method||'對外徵才',
+    open_date:j.date||'',resp_text:j.resp||'',jd:j.jd||'',
+    status:j.status||'draft',
+    sel_skills:j.selSkills instanceof Set?[...j.selSkills]:(j.selSkills||[]),
+    custom_skills:j.customSkills||[],
+    created_by:currentUser.id
   };
-
-  if (j.id && !j.id.startsWith('local_')) {
-    // 更新
-    const { error } = await sb.from('jobs').update(payload).eq('id', j.id);
-    if (error) { showToast('儲存失敗：' + error.message); return; }
+  if(j.id&&!String(j.id).startsWith('local_')){
+    const {error}=await sb.from('jobs').update(payload).eq('id',j.id);
+    if(error){showToast('儲存失敗：'+error.message);return;}
   } else {
-    // 新增
-    const { data, error } = await sb.from('jobs').insert(payload).select().single();
-    if (error) { showToast('儲存失敗：' + error.message); return; }
-    j.id = data.id;
+    const {data,error}=await sb.from('jobs').insert(payload).select().single();
+    if(error){showToast('儲存失敗：'+error.message);return;}
+    j.id=data.id;
   }
-  showToast('✓ 已儲存', 'green');
   renderJobList();
 }
 
 async function loadApplicantsForJob(jobId){
-  const { data } = await sb.from('candidates').select('*').eq('job_id', jobId).order('created_at');
-  if (!data) return [];
-
-  const applicants = [];
-  for (const c of data) {
-    const { data: interviews } = await sb.from('interviews')
-      .select('*').eq('candidate_id', c.id).order('round');
-    const rounds = { 1:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''},
-                     2:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''},
-                     3:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''} };
-    (interviews || []).forEach(iv => {
-      rounds[iv.round] = {
-        id: iv.id,
-        date: iv.interview_date || '',
-        interviewer: iv.interviewer || '',
-        scores: iv.scores || {},
-        notes: iv.notes || {},
-        comment: iv.comment || '',
-        result: iv.result || ''
-      };
+  const {data}=await sb.from('candidates').select('*').eq('job_id',jobId).order('created_at');
+  if(!data)return[];
+  const applicants=[];
+  for(const c of data){
+    const {data:ivs}=await sb.from('interviews').select('*').eq('candidate_id',c.id).order('round');
+    const rounds={
+      1:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''},
+      2:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''},
+      3:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''}
+    };
+    (ivs||[]).forEach(iv=>{
+      rounds[iv.round]={id:iv.id,date:iv.interview_date||'',interviewer:iv.interviewer||'',
+        scores:iv.scores||{},notes:iv.notes||{},comment:iv.comment||'',result:iv.result||''};
     });
-    applicants.push({ id: c.id, name: c.name, status: c.status, rounds });
+    applicants.push({id:c.id,name:c.name,status:c.status,rounds});
   }
   return applicants;
 }
 
 async function saveInterview(){
-  const j = curJob(); if (!j || !j.applicants) return;
-  const a = j.applicants[CA]; if (!a) return;
-  const r = a.rounds[CR]; if (!r) return;
+  const j=curJob();if(!j||!j.applicants)return;
+  const a=j.applicants[CA];if(!a||!a.id){showToast('請先填寫應徵者姓名並儲存');return;}
   syncRound();
-
-  const payload = {
-    candidate_id:   a.id,
-    job_id:         j.id,
-    round:          CR,
-    interview_date: r.date,
-    interviewer:    r.interviewer,
-    scores:         r.scores,
-    notes:          r.notes,
-    comment:        r.comment,
-    result:         r.result,
-    created_by:     currentUser.id
+  const r=a.rounds[CR];
+  const payload={
+    candidate_id:a.id,job_id:j.id,round:CR,
+    interview_date:r.date,interviewer:r.interviewer,
+    scores:r.scores,notes:r.notes,comment:r.comment,result:r.result,
+    created_by:currentUser.id
   };
-
-  if (r.id) {
-    await sb.from('interviews').update(payload).eq('id', r.id);
+  if(r.id){
+    await sb.from('interviews').update(payload).eq('id',r.id);
   } else {
-    const { data } = await sb.from('interviews').insert(payload).select().single();
-    if (data) r.id = data.id;
+    const {data}=await sb.from('interviews').insert(payload).select().single();
+    if(data)r.id=data.id;
   }
-  showToast('✓ 面試紀錄已儲存', 'green');
+  showToast('✓ 面試紀錄已儲存','green');
 }
 
 async function saveProbation(){
-  const j = curJob(); if (!j) return;
+  const j=curJob();if(!j)return;
   syncProbation();
-  const prob = j.probation || {};
-  const cand = j.applicants?.[0];
-  if (!cand) { showToast('請先建立應徵者'); return; }
-
-  const payload = {
-    candidate_id: cand.id,
-    job_id:       j.id,
-    scores:       prob.scores || {},
-    notes:        prob.notes  || {},
-    self_comment: prob.selfComment || '',
-    mgr_comment:  prob.mgrComment  || '',
-    result:       prob.result       || '',
-    created_by:   currentUser.id
+  const prob=j.probation||{};
+  const cand=j.applicants?.[0];
+  if(!cand||!cand.id){showToast('請先建立應徵者資料');return;}
+  const payload={
+    candidate_id:cand.id,job_id:j.id,
+    scores:prob.scores||{},notes:prob.notes||{},
+    self_comment:prob.selfComment||'',mgr_comment:prob.mgrComment||'',
+    result:prob.result||'',created_by:currentUser.id
   };
-
-  if (prob.id) {
-    await sb.from('probations').update(payload).eq('id', prob.id);
+  if(prob.id){
+    await sb.from('probations').update(payload).eq('id',prob.id);
   } else {
-    const { data } = await sb.from('probations').insert(payload).select().single();
-    if (data) prob.id = data.id;
+    const {data}=await sb.from('probations').insert(payload).select().single();
+    if(data)prob.id=data.id;
   }
-  showToast('✓ 考核紀錄已儲存', 'green');
+  showToast('✓ 考核紀錄已儲存','green');
 }
 
-// ══ 覆寫需要改變行為的函式 ══════════════════════════════
-
-// addJob 改為建立本地暫存，儲存後才寫到 Supabase
-const _origAddJob = addJob;
-window.addJob = function(){
+// ══ 覆寫需要改行為的函式 ══════════════════════════════════════════
+const _origAddJob=window.addJob;
+window.addJob=function(){
   DB.jobs.unshift({
-    id: 'local_' + Date.now(),
-    title:'', dept:'', mgr:'', method:'對外徵才', date:'', jd:'',
-    series:null, level:null, roleKey:null,
-    selSkills: new Set(), customSkills:[],
-    applicants:[], probation:null, status:'draft'
+    id:'local_'+Date.now(),
+    title:'',dept:'',mgr:'',method:'對外徵才',date:'',jd:'',
+    series:null,level:null,roleKey:null,
+    selSkills:new Set(),customSkills:[],
+    applicants:[],probation:null,status:'draft'
   });
-  CJ = 0; CA = 0; CR = 1;
-  renderJobList(); loadJobToForm(); goTo(1);
+  CJ=0;CA=0;CR=1;
+  renderJobList();loadJobToForm();goTo(1);
 };
 
-// syncJobMeta 同步後自動儲存
-const _origSyncJobMeta = syncJobMeta;
-window.syncJobMeta = function(){
+const _origSyncJobMeta=window.syncJobMeta;
+window.syncJobMeta=function(){
   _origSyncJobMeta();
   clearTimeout(window._saveTimer);
-  window._saveTimer = setTimeout(saveJob, 1500); // 停止輸入 1.5 秒後自動儲存
+  window._saveTimer=setTimeout(saveJob,1500);
 };
 
-// toPage2 改為先載入應徵者資料
-const _origToPage2 = toPage2;
-window.toPage2 = async function(){
-  const j = curJob();
-  if (!j) return;
-  if (!j.series || !j.level) { showToast('請先選擇序列與職級'); return; }
-  const sel = j.selSkills instanceof Set ? j.selSkills : new Set(j.selSkills);
-  if (!sel.size) { showToast('請至少選擇一項技能'); return; }
-
-  // 確保 job 已存到 Supabase
+const _origToPage2=window.toPage2;
+window.toPage2=async function(){
+  const j=curJob();if(!j)return;
+  if(!j.series||!j.level){showToast('請先選擇序列與職級');return;}
+  const sel=j.selSkills instanceof Set?j.selSkills:new Set(j.selSkills);
+  if(!sel.size){showToast('請至少選擇一項技能');return;}
   await saveJob();
-
-  // 載入應徵者
-  if (!j.applicants || !j.applicants.length) {
-    j.applicants = await loadApplicantsForJob(j.id);
-    if (!j.applicants.length) {
-      // 新增第一位應徵者（暫存，尚未寫入DB）
-      j.applicants = [{ id: null, name:'', rounds:{
+  if(!j.applicants||!j.applicants.length){
+    j.applicants=await loadApplicantsForJob(j.id);
+    if(!j.applicants.length){
+      j.applicants=[{id:null,name:'',rounds:{
         1:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''},
         2:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''},
         3:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''}
       }}];
     }
   }
-  CA = 0; CR = 1;
-  buildApplicantTabs(); loadApplicantToForm(); buildScoreRows(); goTo(2);
+  CA=0;CR=1;
+  buildApplicantTabs();loadApplicantToForm();buildScoreRows();goTo(2);
 };
 
-// syncApplicant 自動儲存應徵者姓名
-const _origSyncApplicant = syncApplicant;
-window.syncApplicant = async function(){
-  _origSyncApplicant();
-  const j = curJob(); if (!j) return;
-  const a = j.applicants[CA]; if (!a) return;
-  if (!a.id) {
-    // 第一次建立
-    const { data } = await sb.from('candidates')
-      .insert({ job_id: j.id, name: a.name, created_by: currentUser.id })
+const _origSyncApplicant=window.syncApplicant;
+window.syncApplicant=async function(){
+  const j=curJob();if(!j)return;
+  if(!j.applicants)j.applicants=[];
+  j.applicants[CA].name=document.getElementById('a-name').value;
+  const a=j.applicants[CA];
+  if(a.name&&!a.id&&j.id&&!String(j.id).startsWith('local_')){
+    const {data}=await sb.from('candidates')
+      .insert({job_id:j.id,name:a.name,created_by:currentUser.id})
       .select().single();
-    if (data) a.id = data.id;
-  } else {
-    await sb.from('candidates').update({ name: a.name }).eq('id', a.id);
+    if(data)a.id=data.id;
+  } else if(a.id&&a.name){
+    await sb.from('candidates').update({name:a.name}).eq('id',a.id);
   }
   buildApplicantTabs();
 };
 
-// 在 Nav 加「儲存」按鈕動作
-window.manualSave = async function(){
-  await saveJob();
-  await saveInterview();
-};
-
-// ══ 啟動：檢查是否已登入 ══════════════════════════════
-(async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session?.user) {
+// ══ 啟動 ═════════════════════════════════════════════════════════
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(session?.user){
     await initApp(session.user);
   } else {
     showLogin();
   }
 })();
+
 </script>
 </body>
 </html>
