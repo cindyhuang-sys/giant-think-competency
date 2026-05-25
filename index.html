@@ -164,7 +164,7 @@ textarea{resize:vertical;min-height:68px}
 .rating-btn.a2{background:#FEF3C7;border-color:#D97706;color:#92600A}
 .rating-btn.a3{background:#D1FAE5;border-color:#059669;color:#065F46}
 .rating-btn.a4{background:#EDE9FE;border-color:#7C3AED;color:#5B21B6}
-.rating-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3);padding:0 2px;margin-bottom:8px}
+.rating-labels{display:flex;gap:4px;font-size:10px;color:var(--ink3);margin-bottom:8px}
 /* Behavior popover */
 .behavior-toggle{font-size:11px;color:var(--blue-mid);cursor:pointer;text-decoration:underline;text-underline-offset:2px;margin-bottom:7px;display:inline-block}
 .behavior-box{background:var(--blue-lt);border:1px solid #BFDBFE;border-radius:var(--r);padding:10px 12px;margin-bottom:8px;display:none}
@@ -1526,9 +1526,11 @@ function switchRound(n){
   document.getElementById('r-interviewer').value = r.interviewer || '';
   document.getElementById('r-comment').value = r.comment || '';
   document.getElementById('r-result').value = r.result || '';
-  buildScoreRows();
+  const isHR = (n === 3);
+  document.getElementById('score-section').style.display = isHR ? 'none' : 'block';
+  document.getElementById('hr-notice').style.display = isHR ? 'block' : 'none';
+  if(!isHR) buildScoreRows();
 }
-
 function syncRound(){
   const j = curJob(); if (!j || !j.applicants || !j.applicants[CA]) return;
   const r = j.applicants[CA].rounds[CR];
@@ -1564,7 +1566,7 @@ function buildScoreRows(){
       <div class="rating-wrap">
         ${[1,2,3,4].map(n=>`<button class="rating-btn${curScore===n?' a'+n:''}" onclick="setScore('${sk.id}',${n},this)">${n}</button>`).join('')}
       </div>
-      <div class="rating-labels"><span>待發展</span><span>發展中</span><span>符合期待</span><span>超越期待</span></div>
+      <div class="rating-labels"><span style="width:42px;text-align:center">待發展</span><span style="width:42px;text-align:center">發展中</span><span style="width:42px;text-align:center">符合期待</span><span style="width:42px;text-align:center">超越期待</span></div>
       <textarea class="score-note-input" rows="2" placeholder="面試觀察筆記..." oninput="setNote('${sk.id}',this.value)">${curNote}</textarea>`;
     c.appendChild(row);
   });
@@ -1629,7 +1631,7 @@ function buildProbRows(){
       <div class="rating-wrap">
         ${[1,2,3,4].map(n=>`<button class="rating-btn${pS===n?' a'+n:''}" onclick="setProbScore('${sk.id}',${n},this)">${n}</button>`).join('')}
       </div>
-      <div class="rating-labels"><span>待發展</span><span>發展中</span><span>符合期待</span><span>超越期待</span></div>
+      <div class="rating-labels"><span style="width:42px;text-align:center">待發展</span><span style="width:42px;text-align:center">發展中</span><span style="width:42px;text-align:center">符合期待</span><span style="width:42px;text-align:center">超越期待</span></div>
       <textarea class="score-note-input" rows="2" placeholder="具體事例、觀察備註..." oninput="setProbNote('${sk.id}',this.value)">${note}</textarea>`;
     c.appendChild(row);
   });
@@ -1690,32 +1692,47 @@ function buildInterviewReport(){
   document.getElementById('pvr-mgr').textContent = j.mgr || '—';
   document.getElementById('pvr-date').textContent = r1.date || '—';
 
-  // Rounds
+  // Rounds — 所有關卡完整顯示
   const rSec = document.getElementById('pvr-rounds');
   rSec.innerHTML = '<div class="doc-sec-hd">各關面試紀錄</div>';
   const rNames = {1:'第一關面試',2:'第二關面試',3:'HR 面試'};
+  const rColors = {1:'#F59E0B',2:'#3B6BC5',3:'#5B2080'};
   [1,2,3].forEach(rn => {
     const r = j.applicants?.[0]?.rounds?.[rn] || {};
-    if (!r.date && !r.interviewer && !r.comment && !r.result) return;
+    if(!r.date && !r.interviewer && !r.comment && !r.result) return;
     const box = document.createElement('div');
-    box.style.cssText = 'padding:10px 13px;border-radius:var(--r);background:var(--paper2);margin-bottom:8px;border-left:3px solid #F59E0B';
-    box.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:5px">${rNames[rn]}</div>
+    box.style.cssText = `padding:12px 14px;border-radius:var(--r);background:var(--paper2);margin-bottom:10px;border-left:3px solid ${rColors[rn]}`;
+    const roundScores = r.scores || {};
+    const hasScores = rn !== 3 && Object.keys(roundScores).length > 0;
+    let scoresHtml = '';
+    if(hasScores){
+      const items = skills.map(sk=>{
+        const s = roundScores[sk.id]||0;
+        const note = (r.notes||{})[sk.id]||'';
+        if(!s) return '';
+        return `<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:4px 0;border-bottom:1px solid var(--rule)">
+          <div><span style="font-size:12px;font-weight:600;color:var(--ink)">${sk.name}</span>${note?`<div style="font-size:11px;color:var(--ink3);font-style:italic">${note}</div>`:''}</div>
+          <div class="pv-score ${sc(s)}" style="width:26px;height:26px;font-size:13px;flex-shrink:0">${s}</div>
+        </div>`;
+      }).filter(Boolean).join('');
+      if(items) scoresHtml = `<div style="margin-top:8px">${items}</div>`;
+    }
+    box.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px">${rNames[rn]}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:12px;color:var(--ink2)">
         <div>日期：<strong>${r.date||'—'}</strong></div>
         <div>面試官：<strong>${r.interviewer||'—'}</strong></div>
         <div>建議：<strong style="color:${r.result==='推薦進下一關'||r.result==='錄取'?'var(--green)':r.result==='不推薦'?'var(--red)':'var(--ink)'}">${r.result||'—'}</strong></div>
       </div>
-      ${r.comment?`<div style="font-size:12px;color:var(--ink2);margin-top:7px;line-height:1.65">${r.comment}</div>`:''}`;
+      ${scoresHtml}
+      ${r.comment?`<div style="font-size:12px;color:var(--ink2);margin-top:8px;padding-top:6px;border-top:1px solid var(--rule);line-height:1.65"><strong>評語：</strong>${r.comment}</div>`:''}`;
     rSec.appendChild(box);
   });
-
-  // Skills
   const sc_el = document.getElementById('pvr-skills'); sc_el.innerHTML = '';
   let iTotal=0, iCnt=0;
   skills.forEach(sk => {
     const s = r1.scores?.[sk.id] || 0;
     const note = r1.notes?.[sk.id] || '';
-    if (s) { iTotal+=s; iCnt++; }
+    if(s) { iTotal+=s; iCnt++; }
     const d = document.createElement('div');
     d.className = 'pv-skill-row';
     d.innerHTML = `<div><div class="pv-skill-name">${sk.name}</div><div class="pv-skill-concept">${sk.concepts}</div>${note?`<div class="pv-note">${note}</div>`:''}</div><div class="pv-score ${sc(s)}">${s||'—'}</div>`;
@@ -2002,7 +2019,14 @@ async function loadApplicantsForJob(jobId){
 
 async function saveInterview(){
   const j=curJob();if(!j||!j.applicants)return;
-  const a=j.applicants[CA];if(!a||!a.id){showToast('請先填寫應徵者姓名並儲存');return;}
+  const a=j.applicants[CA];if(!a){showToast('請先建立應徵者');return;}
+  if(!a.id&&a.name&&j.id&&!String(j.id).startsWith('local_')){
+    const {data}=await sb.from('candidates')
+      .insert({job_id:j.id,name:a.name,created_by:currentUser.id})
+      .select().single();
+    if(data)a.id=data.id;
+  }
+  if(!a.id){showToast('請先填寫應徵者姓名');return;}
   syncRound();
   const r=a.rounds[CR];
   const payload={
