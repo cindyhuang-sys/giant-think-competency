@@ -1,0 +1,2201 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>巨思文化 · 職能盤點系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1C1917;--ink2:#57534E;--ink3:#A8A29E;
+  --paper:#FAFAF8;--paper2:#F5F4F0;--paper3:#EEECEA;
+  --rule:#E2DDD8;--rule2:#D1CBC4;
+  --blue:#1E3A8A;--blue-lt:#EFF6FF;--blue-mid:#3B6BC5;
+  --green:#166534;--green-lt:#F0FDF4;
+  --gold:#92600A;--gold-lt:#FFFBEB;
+  --red:#B91C1C;--red-lt:#FEF2F2;
+  --purple:#5B21B6;--purple-lt:#F5F3FF;
+  --r:8px;--r2:14px;
+  --sh:0 1px 2px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.06);
+  --sh2:0 4px 20px rgba(0,0,0,.08),0 16px 48px rgba(0,0,0,.06);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--ink);font-size:14px;line-height:1.65;min-height:100vh}
+
+/* NAV */
+.nav{background:var(--ink);position:sticky;top:0;z-index:300;height:52px;display:flex;align-items:center;padding:0 24px;gap:8px}
+.nav-brand{font-family:'Noto Serif TC',serif;font-weight:700;font-size:14px;color:#FFF;letter-spacing:.5px;margin-right:12px;white-space:nowrap;flex-shrink:0}
+.nav-brand span{color:#F59E0B}
+.nav-track{display:flex;align-items:center;gap:3px}
+.nav-track-label{font-size:9px;letter-spacing:.8px;color:rgba(255,255,255,.28);text-transform:uppercase;padding:0 6px 0 10px;white-space:nowrap}
+.nav-step{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;color:rgba(255,255,255,.4);border:1px solid transparent;white-space:nowrap;background:none}
+.nav-step:hover{color:rgba(255,255,255,.7)}
+.nav-step.active{background:rgba(255,255,255,.12);color:#FFF;border-color:rgba(255,255,255,.15)}
+.nav-step.done{color:#F59E0B}
+.nav-step.done::before{content:'✓ '}
+.nav-divider{width:1px;height:20px;background:rgba(255,255,255,.1);margin:0 6px;flex-shrink:0}
+.nav-right{margin-left:auto;display:flex;gap:6px;flex-shrink:0}
+.nav-btn{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;background:transparent;color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.15);font-family:inherit;transition:all .2s;white-space:nowrap}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:#FFF}
+.nav-btn.primary{background:rgba(245,158,11,.15);color:#F59E0B;border-color:rgba(245,158,11,.3)}
+.nav-btn.primary:hover{background:rgba(245,158,11,.25)}
+
+/* SIDEBAR — 職缺列表 */
+.layout{display:flex;min-height:calc(100vh - 52px)}
+.sidebar{width:220px;flex-shrink:0;background:#FFF;border-right:1px solid var(--rule);padding:16px 12px;overflow-y:auto;max-height:calc(100vh - 52px);position:sticky;top:52px}
+.sidebar-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:10px;padding:0 4px}
+.job-item{padding:9px 10px;border-radius:var(--r);cursor:pointer;transition:all .15s;margin-bottom:3px;border:1.5px solid transparent}
+.job-item:hover{background:var(--paper2)}
+.job-item.active{background:var(--blue-lt);border-color:#1D4ED8}
+.job-item-title{font-size:13px;font-weight:600;color:var(--ink)}
+.job-item.active .job-item-title{color:var(--blue)}
+.job-item-meta{font-size:11px;color:var(--ink3);margin-top:2px}
+.job-item-badge{display:inline-block;font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;margin-top:4px}
+.badge-draft{background:var(--paper3);color:var(--ink3)}
+.badge-interviewing{background:#DBEAFE;color:#1D4ED8}
+.badge-probation{background:#D1FAE5;color:#065F46}
+.add-job-btn{width:100%;padding:8px;border:1.5px dashed var(--rule2);border-radius:var(--r);background:transparent;color:var(--ink3);font-family:inherit;font-size:12px;cursor:pointer;transition:all .15s;margin-top:8px}
+.add-job-btn:hover{border-color:var(--ink2);color:var(--ink2);background:var(--paper2)}
+
+/* MAIN */
+.main{flex:1;padding:28px 28px 60px;max-width:860px;overflow-x:hidden}
+.page{display:none}
+.page.active{display:block;animation:rise .25s ease}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.progress{height:2px;background:var(--rule);margin-bottom:24px;border-radius:1px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#F59E0B,#EF4444);transition:width .4s;border-radius:1px}
+.page-hd{margin-bottom:20px}
+.page-hd h1{font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;color:var(--ink)}
+.page-hd p{font-size:13px;color:var(--ink3);margin-top:4px}
+
+/* CARDS */
+.card{background:#FFF;border:1px solid var(--rule);border-radius:var(--r2);padding:20px;margin-bottom:14px;box-shadow:var(--sh)}
+.card-title{font-size:12px;font-weight:700;color:var(--ink2);letter-spacing:.3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.card-title::before{content:'';width:3px;height:13px;background:#F59E0B;border-radius:2px;flex-shrink:0}
+
+/* FORMS */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row.three{grid-template-columns:1fr 1fr 1fr}
+.form-group{margin-bottom:12px}
+.form-label{font-size:11px;font-weight:600;color:var(--ink3);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.4px}
+.form-label.req::after{content:' *';color:#EF4444}
+input[type=text],input[type=date],textarea,select{width:100%;padding:8px 11px;border:1px solid var(--rule2);border-radius:var(--r);font-family:inherit;font-size:13px;color:var(--ink);background:var(--paper2);outline:none;transition:border-color .15s,box-shadow .15s;appearance:none}
+input:focus,textarea:focus,select:focus{border-color:#F59E0B;box-shadow:0 0 0 3px rgba(245,158,11,.1);background:#FFF}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23A8A29E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;cursor:pointer}
+textarea{resize:vertical;min-height:68px}
+
+/* SERIES / LEVEL PICKERS */
+.series-grid{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:5px}
+.series-btn{padding:9px 16px;border:1.5px solid var(--rule2);border-radius:var(--r);background:#FFF;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:72px}
+.series-btn:hover{border-color:var(--ink2)}
+.series-btn.sel{border-color:var(--ink);background:var(--ink);color:#FFF}
+.series-code{font-family:'Noto Serif TC',serif;font-size:18px;font-weight:700;line-height:1}
+.series-name{font-size:10px;opacity:.7}
+.level-btns{display:flex;gap:5px;flex-wrap:wrap}
+.level-btn{padding:6px 14px;border:1.5px solid var(--rule2);border-radius:20px;background:#FFF;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.level-btn.l1.sel{background:#DBEAFE;border-color:#1D4ED8;color:#1D4ED8}
+.level-btn.l2.sel{background:#D1FAE5;border-color:#065F46;color:#065F46}
+.level-btn.l3.sel{background:#FEF3C7;border-color:#92600A;color:#92600A}
+.level-btn.l4.sel{background:#F3E8FF;border-color:#6B21A8;color:#6B21A8}
+.role-badge{display:inline-flex;align-items:center;padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid;margin-top:5px}
+.rb-P1,.rb-P2{background:#DBEAFE;border-color:#1D4ED8;color:#1D4ED8}
+.rb-P3,.rb-P4{background:#EDE9FE;border-color:#6B21A8;color:#6B21A8}
+.rb-B0,.rb-B1,.rb-B2{background:#D1FAE5;border-color:#065F46;color:#065F46}
+.rb-B3,.rb-B4{background:#ECFDF5;border-color:#059669;color:#047857}
+.rb-C1,.rb-C2{background:#FEF3C7;border-color:#D97706;color:#92600A}
+.rb-C3,.rb-C4{background:#FFF7ED;border-color:#EA580C;color:#C2410C}
+.rb-S1,.rb-S2{background:#FEE2E2;border-color:#DC2626;color:#B91C1C}
+.rb-S3,.rb-S4{background:#FFF1F2;border-color:#E11D48;color:#BE123C}
+.rb-T1,.rb-T2{background:#E0F2FE;border-color:#0284C7;color:#0369A1}
+.rb-T3,.rb-T4{background:#F0F9FF;border-color:#0EA5E9;color:#0284C7}
+
+/* RESP BOX */
+.resp-box{background:var(--paper2);border-left:3px solid #F59E0B;border-radius:0 var(--r) var(--r) 0;padding:11px 13px;font-size:12px;color:var(--ink2);line-height:1.7;margin-bottom:13px}
+
+/* SKILLS */
+.skills-tip{background:var(--gold-lt);border:1px solid rgba(245,158,11,.2);border-radius:var(--r);padding:9px 12px;font-size:12px;color:var(--gold);margin-bottom:12px;line-height:1.6}
+.skills-placeholder{text-align:center;padding:32px 20px;color:var(--ink3)}
+.skills-placeholder .icon{font-size:26px;margin-bottom:8px}
+.skills-placeholder h3{font-size:13px;color:var(--ink2);margin-bottom:3px}
+.sel-count{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--ink3)}
+.badge{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.badge-ok{background:#D1FAE5;color:#065F46}
+.badge-warn{background:#FEF3C7;color:#92600A}
+.badge-err{background:#FEE2E2;color:#B91C1C}
+.skill-group-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);padding:7px 0 5px;border-bottom:1px solid var(--rule);margin-bottom:6px;display:flex;justify-content:space-between}
+.skill-item{display:flex;gap:9px;padding:9px 11px;border-radius:var(--r);border:1.5px solid transparent;cursor:pointer;transition:all .12s;margin-bottom:3px;background:var(--paper2)}
+.skill-item:hover{background:#FFF;border-color:var(--rule2)}
+.skill-item.sel{background:var(--blue-lt);border-color:#1D4ED8}
+.skill-item.sel .skill-name{color:var(--blue);font-weight:600}
+.skill-chk{width:16px;height:16px;border:1.5px solid var(--rule2);border-radius:4px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.skill-item.sel .skill-chk{background:#1D4ED8;border-color:#1D4ED8}
+.skill-item.sel .skill-chk::after{content:'';width:8px;height:5px;border-left:2px solid #FFF;border-bottom:2px solid #FFF;transform:rotate(-45deg) translateY(-1px)}
+.skill-name{font-size:13px;font-weight:500;color:var(--ink)}
+.skill-concepts{font-size:11px;color:var(--ink3);margin-top:2px;line-height:1.5}
+/* Custom skill add */
+.custom-skill-add{display:flex;gap:7px;margin-top:10px}
+.custom-skill-add input{flex:1}
+
+/* APPLICANT TABS */
+.applicant-row{display:flex;align-items:center;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.applicant-tab{padding:6px 13px;border:1.5px solid var(--rule2);border-radius:20px;font-family:inherit;font-size:12px;cursor:pointer;background:#FFF;transition:all .15s;white-space:nowrap}
+.applicant-tab.active{background:var(--ink);color:#FFF;border-color:var(--ink)}
+.applicant-tab.has-data::after{content:'·';color:#22C55E;margin-left:4px;font-size:16px;line-height:0;vertical-align:middle}
+.add-applicant-btn{padding:6px 12px;border:1.5px dashed var(--rule2);border-radius:20px;font-family:inherit;font-size:12px;cursor:pointer;background:transparent;color:var(--ink3);transition:all .15s}
+.add-applicant-btn:hover{border-color:var(--ink2);color:var(--ink2)}
+
+/* ROUND TABS */
+.round-tabs{display:flex;gap:5px;margin-bottom:14px}
+.round-tab{flex:1;padding:7px;border:1.5px solid var(--rule2);border-radius:var(--r);font-family:inherit;font-size:12px;cursor:pointer;background:#FFF;transition:all .15s;text-align:center}
+.round-tab.active{background:var(--ink);color:#FFF;border-color:var(--ink)}
+
+/* SCORE ROWS */
+.score-row{padding:14px 0;border-bottom:1px solid var(--rule)}
+.score-row:last-child{border-bottom:none}
+.score-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+.score-skill{font-size:13px;font-weight:600;color:var(--ink)}
+.score-concept{font-size:11px;color:var(--ink3);margin-top:3px;line-height:1.5}
+.score-q-box{font-size:11px;color:var(--ink2);font-style:italic;max-width:280px;text-align:right;line-height:1.5;flex-shrink:0}
+.rating-wrap{display:flex;gap:4px;margin-bottom:6px}
+.rating-btn{width:42px;height:38px;border-radius:var(--r);border:1.5px solid var(--rule2);background:var(--paper2);font-family:'Noto Serif TC',serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .15s;color:var(--ink3)}
+.rating-btn:hover{transform:translateY(-2px)}
+.rating-btn.a1{background:#FEE2E2;border-color:#DC2626;color:#991B1B}
+.rating-btn.a2{background:#FEF3C7;border-color:#D97706;color:#92600A}
+.rating-btn.a3{background:#D1FAE5;border-color:#059669;color:#065F46}
+.rating-btn.a4{background:#EDE9FE;border-color:#7C3AED;color:#5B21B6}
+.rating-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3);padding:0 2px;margin-bottom:8px}
+/* Behavior popover */
+.behavior-toggle{font-size:11px;color:var(--blue-mid);cursor:pointer;text-decoration:underline;text-underline-offset:2px;margin-bottom:7px;display:inline-block}
+.behavior-box{background:var(--blue-lt);border:1px solid #BFDBFE;border-radius:var(--r);padding:10px 12px;margin-bottom:8px;display:none}
+.behavior-box.open{display:block}
+.behavior-row{display:grid;grid-template-columns:32px 1fr;gap:8px;margin-bottom:6px;align-items:start}
+.behavior-row:last-child{margin-bottom:0}
+.behavior-score{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-weight:700;font-size:13px;flex-shrink:0}
+.bs1{background:#FEE2E2;color:#991B1B}
+.bs2{background:#FEF3C7;color:#92600A}
+.bs3{background:#D1FAE5;color:#065F46}
+.bs4{background:#EDE9FE;color:#5B21B6}
+.behavior-text{font-size:11px;color:var(--ink2);line-height:1.55;padding-top:4px}
+.score-note-input{width:100%;padding:7px 10px;border:1px solid var(--rule);border-radius:var(--r);font-family:inherit;font-size:12px;color:var(--ink);background:var(--paper2);outline:none;transition:border-color .15s;resize:none}
+.score-note-input:focus{border-color:#F59E0B;background:#FFF}
+.score-note-input::placeholder{color:var(--ink3)}
+.score-legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.sl-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink3)}
+.sl-dot{width:17px;height:17px;border-radius:4px;font-family:'Noto Serif TC',serif;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center}
+
+/* PROBATION */
+.prob-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:#FFF;border:1px solid var(--rule);border-radius:var(--r);padding:13px;text-align:center;box-shadow:var(--sh)}
+.stat-n{font-family:'Noto Serif TC',serif;font-size:24px;font-weight:700;line-height:1}
+.stat-l{font-size:11px;color:var(--ink3);margin-top:4px}
+.stat-card.blue .stat-n{color:var(--blue)}
+.stat-card.grn .stat-n{color:var(--green)}
+.stat-card.amb .stat-n{color:var(--gold)}
+.diff-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;margin-left:5px}
+.diff-up{background:#D1FAE5;color:#065F46}
+.diff-dn{background:#FEE2E2;color:#B91C1C}
+.diff-eq{background:var(--paper3);color:var(--ink3)}
+
+/* PREVIEW / REPORT */
+.preview-doc{background:#FFF;border:1px solid var(--rule);border-radius:var(--r2);padding:30px;max-width:660px;margin:0 auto;box-shadow:var(--sh2)}
+.doc-logo{font-family:'Noto Serif TC',serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--ink3);margin-bottom:4px}
+.doc-title{font-family:'Noto Serif TC',serif;font-size:19px;font-weight:700;color:var(--ink);border-bottom:2px solid var(--ink);padding-bottom:9px;margin-bottom:14px}
+.doc-meta{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px;margin-bottom:18px}
+.doc-meta-item{font-size:12px;color:var(--ink2)}
+.doc-meta-item span{font-weight:600;color:var(--ink)}
+.doc-sec-hd{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);padding:5px 0;border-bottom:1px solid var(--rule);margin:14px 0 9px}
+.pv-skill-row{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--rule);gap:10px}
+.pv-skill-row:last-child{border-bottom:none}
+.pv-skill-name{font-size:13px;font-weight:600;color:var(--ink);flex:1}
+.pv-skill-concept{font-size:11px;color:var(--ink3);margin-top:2px}
+.pv-score{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;flex-shrink:0}
+.pv-s1{background:#FEE2E2;color:#991B1B}
+.pv-s2{background:#FEF3C7;color:#92600A}
+.pv-s3{background:#D1FAE5;color:#065F46}
+.pv-s4{background:#EDE9FE;color:#5B21B6}
+.pv-s0{background:var(--paper3);color:var(--ink3)}
+.pv-note{font-size:11px;color:var(--ink3);font-style:italic;margin-top:3px}
+.pv-avg{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--paper2);border-radius:var(--r);margin-top:12px}
+.pv-avg-label{font-size:12px;font-weight:700;color:var(--ink2)}
+.pv-avg-score{font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;color:var(--blue)}
+.pv-comment{padding:11px 13px;border-radius:var(--r);font-size:12px;line-height:1.7;margin-top:9px}
+.comment-int{background:var(--gold-lt);border-left:3px solid #F59E0B}
+.comment-prob{background:var(--purple-lt);border-left:3px solid #7C3AED}
+.score-legend-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:7px}
+.sll-cell{text-align:center;padding:7px 5px;border-radius:6px}
+.sign-row{display:grid;gap:10px;text-align:center;margin-top:18px;padding-top:14px;border-top:1px solid var(--rule);font-size:11px;color:var(--ink3)}
+
+/* COMPARE TABLE */
+.cmp-hd{display:grid;grid-template-columns:1fr 52px 52px 52px;gap:0;padding:5px 0;border-bottom:1px solid var(--rule);margin-bottom:4px}
+.cmp-hd div{font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.4px;text-align:center}
+.cmp-hd div:first-child{text-align:left}
+.cmp-row{display:grid;grid-template-columns:1fr 52px 52px 52px;gap:0;padding:7px 0;border-bottom:1px solid var(--rule);align-items:center}
+.cmp-row:last-child{border-bottom:none}
+.cmp-cell{display:flex;align-items:center;justify-content:center}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--r);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:none}
+.btn-primary{background:var(--ink);color:#FFF}
+.btn-primary:hover{background:#2C2925}
+.btn-secondary{background:#FFF;color:var(--ink);border:1.5px solid var(--rule2)}
+.btn-secondary:hover{border-color:var(--ink)}
+.btn-ghost{background:transparent;color:var(--ink3);border:1.5px solid var(--rule);font-size:12px;padding:7px 13px}
+.btn-ghost:hover{color:var(--ink);border-color:var(--ink2)}
+.btn-danger{background:#FEE2E2;color:#B91C1C;border:1.5px solid #FECACA}
+.btn-danger:hover{background:#FECACA}
+.btn-group{display:flex;gap:7px;justify-content:space-between;align-items:center;margin-top:20px;padding-top:14px;border-top:1px solid var(--rule)}
+.btn-group-right{display:flex;gap:7px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#FFF;border-radius:var(--r2);padding:24px;width:460px;max-width:90vw;box-shadow:var(--sh2)}
+.modal h2{font-family:'Noto Serif TC',serif;font-size:16px;font-weight:700;margin-bottom:14px}
+.modal-btns{display:flex;gap:7px;justify-content:flex-end;margin-top:18px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#FFF;padding:10px 18px;border-radius:var(--r);font-size:13px;font-weight:500;z-index:600;transform:translateY(80px);opacity:0;transition:all .3s;box-shadow:var(--sh2)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.green{background:var(--green)}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:60px 20px;color:var(--ink3)}
+.empty-state .icon{font-size:40px;margin-bottom:14px}
+.empty-state h2{font-size:16px;color:var(--ink2);margin-bottom:6px}
+
+@media print{
+  .nav,.sidebar,.btn-group,.no-print{display:none!important}
+  .layout{display:block}
+  .main{padding:0;max-width:100%}
+  .preview-doc{box-shadow:none;border:none;padding:0}
+  body{background:#FFF}
+}
+</style>
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ══ Supabase 連線設定 ══════════════════════════════════
+const SUPABASE_URL  = '貼上你的 Project URL';
+const SUPABASE_KEY  = '貼上你的 anon public key';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentUserRole = null;
+</script>
+</head>
+<body>
+  <!-- 登入頁 -->
+<div id="login-page" style="
+  position:fixed;inset:0;background:#FAFAF8;
+  display:flex;align-items:center;justify-content:center;z-index:1000">
+  <div style="
+    background:#FFF;border:1px solid #E2DDD8;border-radius:16px;
+    padding:40px;width:380px;box-shadow:0 4px 20px rgba(0,0,0,.08)">
+    <div style="font-family:'Noto Serif TC',serif;font-size:22px;font-weight:700;
+      color:#1C1917;margin-bottom:6px">巨<span style="color:#F59E0B">思</span> · 職能盤點</div>
+    <div style="font-size:13px;color:#A8A29E;margin-bottom:28px">請登入您的帳號</div>
+
+    <div id="login-error" style="
+      display:none;background:#FEF2F2;border:1px solid #FECACA;
+      border-radius:8px;padding:10px 14px;font-size:13px;color:#B91C1C;
+      margin-bottom:16px"></div>
+
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:600;color:#A8A29E;
+        text-transform:uppercase;letter-spacing:.4px;display:block;
+        margin-bottom:5px">電子郵件</label>
+      <input type="email" id="login-email"
+        placeholder="your@email.com"
+        style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;
+        border-radius:8px;font-family:inherit;font-size:13px;outline:none">
+    </div>
+    <div style="margin-bottom:20px">
+      <label style="font-size:11px;font-weight:600;color:#A8A29E;
+        text-transform:uppercase;letter-spacing:.4px;display:block;
+        margin-bottom:5px">密碼</label>
+      <input type="password" id="login-password"
+        placeholder="••••••••"
+        style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;
+        border-radius:8px;font-family:inherit;font-size:13px;outline:none"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button onclick="doLogin()" style="
+      width:100%;padding:11px;background:#1C1917;color:#FFF;
+      border:none;border-radius:8px;font-family:inherit;font-size:14px;
+      font-weight:600;cursor:pointer">登入</button>
+
+    <div style="text-align:center;margin-top:14px">
+      <span style="font-size:12px;color:#A8A29E">還沒有帳號？</span>
+      <span onclick="showRegister()" style="
+        font-size:12px;color:#1E3A8A;cursor:pointer;text-decoration:underline;
+        margin-left:4px">申請帳號</span>
+    </div>
+  </div>
+</div>
+
+<!-- 申請帳號頁（預設隱藏）-->
+<div id="register-page" style="
+  position:fixed;inset:0;background:#FAFAF8;
+  display:none;align-items:center;justify-content:center;z-index:1000">
+  <div style="
+    background:#FFF;border:1px solid #E2DDD8;border-radius:16px;
+    padding:40px;width:380px;box-shadow:0 4px 20px rgba(0,0,0,.08)">
+    <div style="font-family:'Noto Serif TC',serif;font-size:18px;font-weight:700;
+      color:#1C1917;margin-bottom:20px">申請帳號</div>
+
+    <div id="register-error" style="
+      display:none;background:#FEF2F2;border:1px solid #FECACA;
+      border-radius:8px;padding:10px 14px;font-size:13px;color:#B91C1C;
+      margin-bottom:16px"></div>
+    <div id="register-success" style="
+      display:none;background:#F0FDF4;border:1px solid #BBF7D0;
+      border-radius:8px;padding:10px 14px;font-size:13px;color:#166534;
+      margin-bottom:16px"></div>
+
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:#A8A29E;
+        text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px">姓名</label>
+      <input type="text" id="reg-name" placeholder="王小明"
+        style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;
+        border-radius:8px;font-family:inherit;font-size:13px;outline:none">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:#A8A29E;
+        text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px">電子郵件</label>
+      <input type="email" id="reg-email" placeholder="your@email.com"
+        style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;
+        border-radius:8px;font-family:inherit;font-size:13px;outline:none">
+    </div>
+    <div style="margin-bottom:20px">
+      <label style="font-size:11px;font-weight:600;color:#A8A29E;
+        text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px">密碼</label>
+      <input type="password" id="reg-password" placeholder="至少 6 個字元"
+        style="width:100%;padding:9px 12px;border:1px solid #D1CBC4;
+        border-radius:8px;font-family:inherit;font-size:13px;outline:none">
+    </div>
+    <button onclick="doRegister()" style="
+      width:100%;padding:11px;background:#1C1917;color:#FFF;
+      border:none;border-radius:8px;font-family:inherit;font-size:14px;
+      font-weight:600;cursor:pointer;margin-bottom:10px">申請</button>
+    <button onclick="showLogin()" style="
+      width:100%;padding:9px;background:transparent;color:#6B6460;
+      border:1px solid #E2DDD8;border-radius:8px;font-family:inherit;
+      font-size:13px;cursor:pointer">← 返回登入</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">巨<span>思</span> · 職能盤點</div>
+  <div class="nav-track">
+    <span class="nav-track-label">TRACK A</span>
+    <button class="nav-step active" id="pill-1" onclick="goTo(1)">增補開缺</button>
+    <button class="nav-step" id="pill-2" onclick="goTo(2)">面談記錄</button>
+    <button class="nav-step" id="pill-r" onclick="goTo('r')">面試報告</button>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-track">
+    <span class="nav-track-label">TRACK B</span>
+    <button class="nav-step" id="pill-3" onclick="goTo(3)">試用期考核</button>
+    <button class="nav-step" id="pill-4" onclick="goTo(4)">考核報告</button>
+  </div>
+  <div class="nav-right">
+    <span id="nav-user" style="font-size:12px;color:rgba(255,255,255,.5);margin-right:4px"></span>
+<button class="nav-btn" onclick="doLogout()">登出</button>
+    <button class="nav-btn" onclick="exportData()">↓ 匯出存檔</button>
+    <button class="nav-btn primary" onclick="document.getElementById('import-input').click()">↑ 載入紀錄</button>
+    <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
+  </div>
+</nav>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-title">職缺列表</div>
+    <div id="job-list"></div>
+    <button class="add-job-btn" onclick="addJob()">＋ 新增職缺</button>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- 空狀態 -->
+    <div class="page active" id="page-0">
+      <div class="empty-state">
+        <div class="icon">📋</div>
+        <h2>尚未建立職缺</h2>
+        <p>點擊左側「＋ 新增職缺」開始</p>
+      </div>
+    </div>
+
+    <!-- PAGE 1: 增補開缺 -->
+    <div class="page" id="page-1">
+      <div class="progress"><div class="progress-fill" style="width:33%"></div></div>
+      <div class="page-hd"><h1>增補開缺</h1><p>填寫職缺基本資料，選擇序列職級，系統自動帶出職責定義與預設技能</p></div>
+
+      <div class="card">
+        <div class="card-title">職缺基本資料</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label req">增補職稱</label><input type="text" id="job-title" placeholder="例：課程開發企劃" oninput="syncJobMeta()"></div>
+          <div class="form-group"><label class="form-label req">部門別</label><input type="text" id="job-dept" placeholder="例：行銷企劃部" oninput="syncJobMeta()"></div>
+        </div>
+        <div class="form-row three">
+          <div class="form-group"><label class="form-label">直屬主管</label><input type="text" id="job-mgr" placeholder="填入姓名" oninput="syncJobMeta()"></div>
+          <div class="form-group"><label class="form-label">增補方式</label><select id="job-method" onchange="syncJobMeta()"><option>對外徵才</option><option>內部轉調</option><option>內部晉升</option></select></div>
+          <div class="form-group"><label class="form-label">開缺日期</label><input type="text" id="job-date" placeholder="YYYY/MM/DD" oninput="syncJobMeta()"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">序列職級</div>
+        <div class="form-group">
+          <label class="form-label req">選擇序列</label>
+          <div class="series-grid">
+            <button class="series-btn" data-s="P" onclick="pickSeries(this)"><span class="series-code">P</span><span class="series-name">行銷企劃</span></button>
+            <button class="series-btn" data-s="B" onclick="pickSeries(this)"><span class="series-code">B</span><span class="series-name">業務營運</span></button>
+            <button class="series-btn" data-s="C" onclick="pickSeries(this)"><span class="series-code">C</span><span class="series-name">創意內容</span></button>
+            <button class="series-btn" data-s="S" onclick="pickSeries(this)"><span class="series-code">S</span><span class="series-name">業務銷售</span></button>
+            <button class="series-btn" data-s="T" onclick="pickSeries(this)"><span class="series-code">T</span><span class="series-name">數位科技</span></button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label req">職級</label>
+          <div class="level-btns" id="level-btns"></div>
+        </div>
+        <div id="role-display"></div>
+      </div>
+
+      <div class="card" id="resp-card" style="display:none">
+        <div class="card-title">職責定義（自動帶入）</div>
+        <div class="resp-box" id="resp-text"></div>
+        <div class="form-group">
+          <label class="form-label">職務內容 <span style="font-weight:400;text-transform:none;font-style:italic;letter-spacing:0;font-size:11px">（JD，貼上後顯示於面試記錄）</span></label>
+          <textarea id="job-jd" rows="4" placeholder="填入具體工作內容與要求..." oninput="syncJobMeta()"></textarea>
+        </div>
+      </div>
+
+      <div class="card" id="skills-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div class="card-title" style="margin:0">技能選擇</div>
+          <div class="sel-count" id="sel-count-area" style="display:none">
+            <span class="badge" id="sel-badge">已選 0 項</span>
+            <span id="sel-msg"></span>
+          </div>
+        </div>
+        <div id="skills-placeholder" class="skills-placeholder"><div class="icon">☝️</div><h3>請先選擇序列與職級</h3><p>系統將自動帶出對應技能清單</p></div>
+        <div id="skills-body" style="display:none">
+          <div class="skills-tip">💡 系統已根據職系預選建議技能，請主管確認並調整為最符合此職缺的 <strong>6–8 項核心技能</strong>。</div>
+          <div id="common-group"><div class="skill-group-label">共通能力</div><div id="common-items"></div></div>
+          <div style="margin-top:12px" id="pro-group"><div class="skill-group-label">專業技能</div><div id="pro-items"></div></div>
+          <div style="margin-top:12px">
+            <div class="skill-group-label">自訂技能</div>
+            <div id="custom-items"></div>
+            <div class="custom-skill-add">
+              <input type="text" id="custom-skill-name" placeholder="技能名稱">
+              <input type="text" id="custom-skill-concepts" placeholder="包含概念（選填）">
+              <button class="btn btn-ghost" style="padding:7px 12px;flex-shrink:0" onclick="addCustomSkill()">新增</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-danger btn-ghost" onclick="confirmDeleteJob()">刪除此職缺</button>
+        <div class="btn-group-right">
+          <button class="btn btn-primary" onclick="toPage2()">下一步：面談記錄 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 2: 面談記錄 -->
+    <div class="page" id="page-2">
+      <div class="progress"><div class="progress-fill" style="width:55%"></div></div>
+      <div class="page-hd"><h1>面談記錄</h1><p>可新增多位應徵者，支援三關面試（第一關、第二關、HR）</p></div>
+
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+        <div class="applicant-row" id="applicant-tabs" style="margin:0"></div>
+        <button class="add-applicant-btn" onclick="addApplicant()">＋ 新增應徵者</button>
+      </div>
+
+      <div id="applicant-panel">
+        <div class="card">
+          <div class="card-title">應徵者資訊</div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label req">應徵者姓名</label><input type="text" id="a-name" placeholder="填入姓名" oninput="syncApplicant()"></div>
+            <div class="form-group"><label class="form-label">應徵職位</label><input type="text" id="a-role" readonly style="opacity:.6;cursor:default"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">面試關卡</div>
+          <div class="round-tabs">
+            <button class="round-tab active" id="round-btn-1" onclick="switchRound(1)">第一關面試</button>
+            <button class="round-tab" id="round-btn-2" onclick="switchRound(2)">第二關面試</button>
+            <button class="round-tab" id="round-btn-3" onclick="switchRound(3)">HR 面試</button>
+          </div>
+          <div id="round-panel">
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">面試日期</label><input type="text" id="r-date" placeholder="YYYY/MM/DD" oninput="syncRound()"></div>
+              <div class="form-group"><label class="form-label">面試官</label><input type="text" id="r-interviewer" placeholder="填入姓名" oninput="syncRound()"></div>
+            </div>
+            <div class="score-legend">
+              <div class="sl-item"><div class="sl-dot pv-s1">1</div>待發展</div>
+              <div class="sl-item"><div class="sl-dot pv-s2">2</div>發展中</div>
+              <div class="sl-item"><div class="sl-dot pv-s3">3</div>符合期待</div>
+              <div class="sl-item"><div class="sl-dot pv-s4">4</div>超越期待</div>
+            </div>
+            <div id="score-rows"></div>
+            <div style="margin-top:14px" class="form-group"><label class="form-label">本關整體評語</label><textarea id="r-comment" rows="3" placeholder="面試觀察、整體印象..." oninput="syncRound()"></textarea></div>
+            <div class="form-group"><label class="form-label">推薦結果</label><select id="r-result" onchange="syncRound()"><option value="">請選擇</option><option>推薦進下一關</option><option>保留觀察</option><option>不推薦</option><option>錄取</option></select></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="goTo(1)">← 返回</button>
+        <div class="btn-group-right">
+          <button class="btn btn-ghost" onclick="goTo('r')">產出面試報告</button><button class="btn btn-ghost" onclick="saveInterview()">💾 儲存紀錄</button>
+          <button class="btn btn-primary" onclick="goTo(3)">前往試用期考核 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE R: 面試報告 -->
+    <div class="page" id="page-r">
+      <div class="progress"><div class="progress-fill" style="width:100%"></div></div>
+      <div class="btn-group no-print" style="margin:0 0 14px;padding:0;border:none">
+        <button class="btn btn-secondary" onclick="goTo(2)">← 返回面談記錄</button>
+        <div class="btn-group-right">
+          <button class="btn btn-ghost" onclick="window.print()">🖨 列印 / 存 PDF</button>
+          <button class="btn btn-primary" onclick="goTo(3)">前往試用期考核 →</button>
+        </div>
+      </div>
+      <div class="preview-doc">
+        <div class="doc-logo">GIANT THINK · 巨思文化</div>
+        <div class="doc-title" id="pvr-title">面試評估報告</div>
+        <div class="doc-meta">
+          <div class="doc-meta-item">應徵者：<span id="pvr-candidate">—</span></div>
+          <div class="doc-meta-item">增補職稱：<span id="pvr-job">—</span></div>
+          <div class="doc-meta-item">部門：<span id="pvr-dept">—</span></div>
+          <div class="doc-meta-item">序列職級：<span id="pvr-level">—</span></div>
+          <div class="doc-meta-item">直屬主管：<span id="pvr-mgr">—</span></div>
+          <div class="doc-meta-item">面試日期：<span id="pvr-date">—</span></div>
+        </div>
+        <div id="pvr-rounds"></div>
+        <div class="doc-sec-hd">技能評分（第一關）</div>
+        <div id="pvr-skills"></div>
+        <div class="pv-avg"><div class="pv-avg-label">第一關平均分</div><div class="pv-avg-score" id="pvr-avg">—</div></div>
+        <div class="doc-sec-hd" style="margin-top:14px">評分等級說明</div>
+        <div class="score-legend-legend">
+          <div class="sll-cell" style="background:#FEE2E2"><div style="font-size:15px;font-weight:700;color:#991B1B;font-family:'Noto Serif TC',serif">1</div><div style="font-size:10px;color:#991B1B">待發展</div></div>
+          <div class="sll-cell" style="background:#FEF3C7"><div style="font-size:15px;font-weight:700;color:#92600A;font-family:'Noto Serif TC',serif">2</div><div style="font-size:10px;color:#92600A">發展中</div></div>
+          <div class="sll-cell" style="background:#D1FAE5"><div style="font-size:15px;font-weight:700;color:#065F46;font-family:'Noto Serif TC',serif">3</div><div style="font-size:10px;color:#065F46">符合期待</div></div>
+          <div class="sll-cell" style="background:#EDE9FE"><div style="font-size:15px;font-weight:700;color:#5B21B6;font-family:'Noto Serif TC',serif">4</div><div style="font-size:10px;color:#5B21B6">超越期待</div></div>
+        </div>
+        <div class="sign-row" style="grid-template-columns:1fr 1fr 1fr">
+          <div>面試官簽名 ＿＿＿＿<br><br>日期 ＿＿＿</div>
+          <div>主管簽名 ＿＿＿＿<br><br>日期 ＿＿＿</div>
+          <div>HR 簽名 ＿＿＿＿<br><br>日期 ＿＿＿</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 3: 試用期考核 -->
+    <div class="page" id="page-3">
+      <div class="progress"><div class="progress-fill" style="width:55%"></div></div>
+      <div class="page-hd"><h1>試用期考核</h1><p>對照面試評分，填入試用期實際觀察，系統自動計算落差</p></div>
+
+      <div class="card">
+        <div class="card-title">考核基本資料</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">員工姓名</label><input type="text" id="p-name" placeholder="填入姓名"></div>
+          <div class="form-group"><label class="form-label">直屬主管</label><input type="text" id="p-mgr-name" placeholder="填入主管姓名"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">技能評估</div>
+        <div class="prob-stats">
+          <div class="stat-card blue"><div class="stat-n" id="st-int">—</div><div class="stat-l">面試平均分</div></div>
+          <div class="stat-card grn"><div class="stat-n" id="st-prob">—</div><div class="stat-l">試用期平均分</div></div>
+          <div class="stat-card amb"><div class="stat-n" id="st-diff">—</div><div class="stat-l">落差</div></div>
+        </div>
+        <div class="score-legend">
+          <div class="sl-item"><div class="sl-dot pv-s1">1</div>待發展</div>
+          <div class="sl-item"><div class="sl-dot pv-s2">2</div>發展中</div>
+          <div class="sl-item"><div class="sl-dot pv-s3">3</div>符合期待</div>
+          <div class="sl-item"><div class="sl-dot pv-s4">4</div>超越期待</div>
+        </div>
+        <div id="prob-rows"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">整體評核</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">夥伴自評</label><textarea id="p-self" rows="3" placeholder="員工自我評估..."></textarea></div>
+          <div class="form-group"><label class="form-label">主管評語</label><textarea id="p-mgr-comment" rows="3" placeholder="主管觀察與建議..."></textarea></div>
+        </div>
+        <div class="form-group"><label class="form-label">試用期結果</label>
+          <select id="p-result"><option value="">請選擇</option><option>通過試用</option><option>延長試用 1 個月</option><option>延長試用 2 個月</option><option>不通過</option></select>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-ghost" onclick="saveProbation()">💾 儲存考核</button>
+        <button class="btn btn-secondary" onclick="goTo('r')">← 返回面試報告</button>
+        <button class="btn btn-primary" onclick="goTo(4)">產出考核報告 →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 4: 考核報告 -->
+    <div class="page" id="page-4">
+      <div class="progress"><div class="progress-fill" style="width:100%"></div></div>
+      <div class="btn-group no-print" style="margin:0 0 14px;padding:0;border:none">
+        <button class="btn btn-secondary" onclick="goTo(3)">← 返回試用期考核</button>
+        <button class="btn btn-ghost" onclick="window.print()">🖨 列印 / 存 PDF</button>
+      </div>
+      <div class="preview-doc">
+        <div class="doc-logo">GIANT THINK · 巨思文化</div>
+        <div class="doc-title" id="pv4-title">試用期考核報告</div>
+        <div class="doc-meta">
+          <div class="doc-meta-item">員工姓名：<span id="pv4-name">—</span></div>
+          <div class="doc-meta-item">職稱：<span id="pv4-job">—</span></div>
+          <div class="doc-meta-item">部門：<span id="pv4-dept">—</span></div>
+          <div class="doc-meta-item">序列職級：<span id="pv4-level">—</span></div>
+          <div class="doc-meta-item">直屬主管：<span id="pv4-mgr">—</span></div>
+          <div class="doc-meta-item">試用期結果：<span id="pv4-result" style="font-weight:700">—</span></div>
+        </div>
+        <div class="doc-sec-hd">技能評分對照</div>
+        <div class="cmp-hd"><div>技能</div><div>面試</div><div>試用期</div><div>落差</div></div>
+        <div id="pv4-comparison"></div>
+        <div class="cmp-row" style="border-top:2px solid var(--rule);margin-top:2px">
+          <div style="font-size:12px;font-weight:700;color:var(--ink2)">平均分</div>
+          <div class="cmp-cell"><span style="font-family:'Noto Serif TC',serif;font-size:15px;font-weight:700;color:var(--blue)" id="pv4-int-avg">—</span></div>
+          <div class="cmp-cell"><span style="font-family:'Noto Serif TC',serif;font-size:15px;font-weight:700;color:var(--green)" id="pv4-prob-avg">—</span></div>
+          <div class="cmp-cell"><span style="font-family:'Noto Serif TC',serif;font-size:15px;font-weight:700" id="pv4-diff-avg">—</span></div>
+        </div>
+        <div class="doc-sec-hd">整體評核</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><div style="font-size:11px;font-weight:600;color:var(--ink3);margin-bottom:5px">夥伴自評</div><div id="pv4-self" style="font-size:12px;color:var(--ink2);line-height:1.7;padding:9px 11px;background:var(--paper2);border-radius:var(--r);min-height:44px">—</div></div>
+          <div><div style="font-size:11px;font-weight:600;color:var(--ink3);margin-bottom:5px">主管評語</div><div id="pv4-mgr-comment" style="font-size:12px;color:var(--ink2);line-height:1.7;padding:9px 11px;background:var(--paper2);border-radius:var(--r);min-height:44px">—</div></div>
+        </div>
+        <div class="doc-sec-hd" style="margin-top:14px">評分等級說明</div>
+        <div class="score-legend-legend">
+          <div class="sll-cell" style="background:#FEE2E2"><div style="font-size:15px;font-weight:700;color:#991B1B;font-family:'Noto Serif TC',serif">1</div><div style="font-size:10px;color:#991B1B">待發展</div></div>
+          <div class="sll-cell" style="background:#FEF3C7"><div style="font-size:15px;font-weight:700;color:#92600A;font-family:'Noto Serif TC',serif">2</div><div style="font-size:10px;color:#92600A">發展中</div></div>
+          <div class="sll-cell" style="background:#D1FAE5"><div style="font-size:15px;font-weight:700;color:#065F46;font-family:'Noto Serif TC',serif">3</div><div style="font-size:10px;color:#065F46">符合期待</div></div>
+          <div class="sll-cell" style="background:#EDE9FE"><div style="font-size:15px;font-weight:700;color:#5B21B6;font-family:'Noto Serif TC',serif">4</div><div style="font-size:10px;color:#5B21B6">超越期待</div></div>
+        </div>
+        <div class="sign-row" style="grid-template-columns:1fr 1fr 1fr 1fr">
+          <div>夥伴簽名 ＿＿<br><br>日期 ＿＿＿</div>
+          <div>主管簽名 ＿＿<br><br>日期 ＿＿＿</div>
+          <div>人資主管 ＿＿<br><br>日期 ＿＿＿</div>
+          <div>執行長 ＿＿＿<br><br>日期 ＿＿＿</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- MODAL: 刪除確認 -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <h2>確認刪除此職缺？</h2>
+    <p style="font-size:13px;color:var(--ink2);line-height:1.7">此動作無法復原，職缺的所有面試紀錄與考核資料都會一併刪除。</p>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+      <button class="btn btn-danger" onclick="deleteJob()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// 技能資料庫
+// ══════════════════════════════════════════════════════════════
+
+const RESP = {
+  P1:"執行＋問題辨識｜具有相關學歷或基本工作經驗，在專業職涯中從事初階、有明確架構及工作流程的專案執行工作，確保專案如期如質如預算執行。運用既定流程與標準作業程序解決例行性問題，提前辨識問題並主動尋求協助。",
+  P2:"企劃＋問題分析｜具備所屬專業領域的相關知識與經驗，執行複雜或較不具成熟流程的工作，獨立完成新企劃提案與執行，並針對專案成果有條理的歸納整理與提出有建設性的完整分析。",
+  P3:"知識傳承＋複雜問題解決｜具備深入的企劃專業知識與經驗，可能帶領專案團隊，以嶄新思維運用既有方法解決複雜或無先例問題，協助單位主管建立或優化標準作業流程與規範。",
+  P4:"內部專家＋分析營運議題＋創新｜具備特定領域深度及廣博的專業知識，在公司內被認可是特定領域專家。帶領功能或跨功能專案團隊解決複雜問題，代表公司品牌對外發言，傳達品牌專業與形象。",
+  B0:"根據既定流程與作法，完成重複性或例行性的工作任務。能在簡單明確的情況下找出問題與相關議題，依循標準作業程序評估狀況並做出合理決定。",
+  B1:"具有相關學歷或基本工作經驗，在專業職涯中從事初階、有明確架構的例行性工作。運用既定流程與標準作業程序解決例行性問題，接受主管明確的指示與引導。",
+  B2:"具備所屬專業領域的相關知識與經驗，執行複雜或較不具成熟流程的工作。結合標準程序、專業經驗與前例，分析判斷常見問題並提出可能解決方案。",
+  B3:"具備深入的專業知識與經驗，以嶄新思維運用既有方法解決複雜或無先例問題。可能帶領專案團隊，獨立工作，主管只提供必要的指導。",
+  B4:"具備特定領域深度及廣博的專業知識，在公司內被認可是特定領域專家。分析公司內外部營運議題，提出改進方案與建議，以作為高階主管制訂策略方向的重要參考。",
+  C1:"具備相關學歷或工作經驗，從事初階、有明確架構的例行性工作。接受主管明確的指示與引導，確實完成被要求創作／製作的作品。",
+  C2:"具備所屬專業領域的相關知識和經驗，熟悉組織運作和工作流程，自主進行企劃提案、創意發想、將抽象概念具象化與視覺化。",
+  C3:"已具備在特定領域的深度專業知識和經驗，獨立提出具嶄新創意、獨特觀點及個人風格的提案，完成具有一定水準、深度及影響力的作品。",
+  C4:"已在公司內外被認可是特定領域專家，掌握專業領域及公司所屬產業的發展趨勢。代表公司品牌對外發言，傳達品牌專業與形象。",
+  S1:"具有數位行銷或銷售相關經驗，快速了解組織所屬產業特性及所銷售產品。從事業務相關例行性工作，包括業務開發、客戶關係維繫、提案溝通與執行。",
+  S2:"具備業務相關領域知識，已累積一定程度業務銷售及專案執行經驗，銷售較複雜或創新產品。分析判斷客戶資訊，明確整理出客戶需求，並提出初步的解決方案。",
+  S3:"具備業務相關領域知識與經驗，主動為客戶提供客製化創新解決方案。獨立解決複雜或無先例問題，帶領專案團隊。",
+  S4:"具備客戶所處產業領域深度及廣度的專業知識，得到客戶的高度信任，擔任客戶行銷策略諮詢的顧問角色。",
+  T1:"具有數位科技相關學習經歷或基本工作經驗，了解該領域基礎工具的應用。從事初階、有明確架構的例行性工作，如維運或建置公司內部已規劃完成的專案。",
+  T2:"具備數位科技專業領域的相關知識與經驗，結合標準程序、專業經驗與前例，分析判斷常見問題並提出可能解決方案。需要主管中等程度的指導（例：code review）。",
+  T3:"具備深入的數位科技專業知識與經驗，獨立研究複雜或無先例的技術，評估對架構與流程的影響，並提供規劃建議。站在部門高度分析公司內部營運議題。",
+  T4:"具備特定領域深度及廣博的專業知識，在公司內被認可是特定領域專家。關注並導入數位科技專業領域前瞻技術及實務，以創造組織在數位科技上的競爭優勢。"
+};
+
+const LEVELS = {
+  P:["P1 初階專業","P2 專業","P3 進階專業","P4 專家"],
+  B:["B0 基礎專業","B1 初階專業","B2 專業","B3 進階專業","B4 專家"],
+  C:["C1 初階專業","C2 專業","C3 進階專業","C4 專家"],
+  S:["S1 初階專業","S2 專業","S3 進階專業","S4 專家"],
+  T:["T1 初階專業","T2 專業","T3 進階專業","T4 專家"]
+};
+
+// 行為錨定描述：每個技能 × 1–4 分
+const BEHAVIORS = {
+  comm_i:{
+    1:"表達常造成誤解，需他人代為轉達或反覆確認；被動等待，不主動聯繫窗口",
+    2:"能傳遞基本訊息，但表達有時不完整或缺乏重點；需提醒才會跟進",
+    3:"能清楚說明需求與進度，與窗口聯繫主動且有效；書面紀錄清晰，減少往返確認",
+    4:"溝通具預見性，能提前識別潛在誤解並澄清；在同儕中自然扮演協調角色"
+  },
+  comm_m:{
+    1:"遇跨部門衝突時迴避或僵化；會議主持無方向，討論發散無結論",
+    2:"能協調簡單跨部門需求，遇利益衝突時依賴主管介入；會議主持基本可行",
+    3:"能獨立協調跨單位需求並推動決議；主持會議有結構，能掌握時間並整理行動項目",
+    4:"能預判跨部門摩擦點並提前建立共識；在多方利害關係人中有效引導討論方向"
+  },
+  comm_a:{
+    1:"對外表達缺乏代表性或說服力；談判時立場不清或讓步過多",
+    2:"能維持基本對外關係，但在公眾表達或高階溝通場合明顯不自在",
+    3:"能代表組織進行有效對外溝通與談判；公眾表達清晰有說服力",
+    4:"在高難度或敏感溝通場合仍能從容應對；能建立長期信任的外部關係"
+  },
+  exec_i:{
+    1:"任務常延遲或未達標；需頻繁催促才有進展；不清楚自己的工作優先序",
+    2:"能完成單一任務，但多任務並行時品質下降；需主管確認方向才推進",
+    3:"能準時交付工作，主動回報進度；具備基本優先序判斷，能在引導下自主執行",
+    4:"能自主管理多項任務並維持品質；主動預警潛在延誤，並提出備案"
+  },
+  exec_m:{
+    1:"多任務並行時頻繁失控；面對模糊情境無法自行判斷，持續依賴主管決策",
+    2:"能處理熟悉類型的多任務，但遇突發狀況反應慢；優先序調整需他人提醒",
+    3:"能穩定管理多項任務，主動識別風險並提出應對；能在模糊情境下自主判斷推進",
+    4:"能建立個人工作追蹤系統；在壓力下仍保持高品質輸出，並協助他人理清優先序"
+  },
+  exec_a:{
+    1:"跨組織執行常卡關；無法有效調度資源或推動他人行動",
+    2:"能推動跨部門任務，但資源協調效率低；SOP或標準建立不完整",
+    3:"能有效調度跨組織資源達成目標；能建立可複製的執行標準與SOP",
+    4:"在高複雜度、多方制約的環境中仍能高效執行；建立的標準被廣泛採用"
+  },
+  logic_i:{
+    1:"遇到問題傾向等待指示；無法清楚描述問題或拆解原因",
+    2:"能描述問題現象，但分析停留在表面；提出的解法單一且缺乏評估",
+    3:"能清楚拆解問題並辨識主要原因；能蒐集資訊後提出多個可能解法供討論",
+    4:"能主動運用基本分析框架（如5W1H）結構化呈現問題；能比較方案優劣並說明理由"
+  },
+  logic_m:{
+    1:"面對複雜問題缺乏系統性思考；分析不完整，解法常治標不治本",
+    2:"能運用部分分析工具，但邏輯結構不嚴謹；在數據支持不足時缺乏判斷信心",
+    3:"能運用結構化框架分析複雜問題；能從數據中找出規律並轉化為可行建議",
+    4:"分析邏輯嚴謹，能有效比較多方案並做出有依據的建議；能指導他人進行結構化思考"
+  },
+  logic_a:{
+    1:"面對組織層級的複雜問題缺乏全局視野；在模糊情境下難以做出有效決策",
+    2:"能分析跨域問題，但跨部門影響評估不足；在高不確定性情境下判斷保守",
+    3:"能進行系統性思考並評估跨域影響；能在模糊情境下做出有依據的決策",
+    4:"能從組織層級預見問題並建立預防機制；決策品質高且能清楚向上說明理由"
+  },
+  adapt_i:{
+    1:"面對工作變動時抗拒或適應緩慢；在團隊合作中被動等待分工，缺乏主動配合意識",
+    2:"能接受工作變動，但需要較長的適應時間；在熟悉的團隊中合作尚可，跨組合作被動",
+    3:"能以正向態度面對工作變動並快速調整；在團隊中主動配合，能識別自己能貢獻的角色",
+    4:"適應變動速度明顯優於同儕；在新的團隊組合中能快速建立信任並推動合作"
+  },
+  adapt_m:{
+    1:"在工作方式或目標頻繁調整時容易失去方向；跨部門合作中常出現本位主義或摩擦",
+    2:"能應對常見的工作變動，但面對重大調整時推進力弱；跨部門合作中需他人主動帶動",
+    3:"能在工作模式或目標改變時迅速重新定向；在跨部門合作中主動溝通、建立共識",
+    4:"在複雜或持續變動的環境中仍能維持高效輸出；跨部門合作中能化解歧見並推動整合"
+  },
+  adapt_a:{
+    1:"在組織層級的重大轉型或架構調整中缺乏彈性；跨組織合作中難以建立有效影響力",
+    2:"能在組織變動中維持基本運作，但主動推動適應的能力有限；跨組織影響力不足",
+    3:"在組織重大變動中能迅速調整方向並帶領團隊重新定向；跨組織合作中具有有效的影響力",
+    4:"在持續動盪的環境中仍能引導組織保持方向與效能；跨組織合作中成為整合的關鍵橋梁"
+  },
+  learn_i:{
+    1:"面對新工具或新方法時抗拒或拖延；需大量指導才能基本上手，且難以自主應用",
+    2:"能配合學習指定工具，但過程被動，需他人推動；上手後應用範圍局限在被示範的場景",
+    3:"能主動上手新工具並在工作中應用；遇到問題時會自行尋找資源解決，不完全依賴他人",
+    4:"學習速度明顯快於同儕；能在短時間內掌握新工具的核心功能，並找到有效應用的場景"
+  },
+  learn_m:{
+    1:"學習新方法停留在表面理解；缺乏將新工具整合進工作流程的能力與主動性",
+    2:"能學習並使用新工具，但整合深度不足；對新方法的評估能力有限，容易過度或不足採用",
+    3:"能快速評估新工具的適用性，並有效整合進工作流程；能對新方法進行有根據的取捨判斷",
+    4:"能系統性地學習並導入新方法，對工作流程產生顯著提升；能指導他人快速完成學習轉化"
+  },
+  learn_a:{
+    1:"缺乏對新方法論或趨勢的掌握；無法評估新工具對組織的戰略價值，決策保守滯後",
+    2:"能追蹤主要新趨勢，但轉化為組織實踐的速度慢；對學習文化的推動缺乏系統性做法",
+    3:"能持續掌握領域新方法論並評估組織應用價值；能有效推動跨部門的學習與工具導入",
+    4:"在新方法的引入上具前瞻性且落地成效顯著；能建立鼓勵學習與實驗的組織環境"
+  },
+  stress_i:{
+    1:"在輕微壓力下即出現明顯情緒波動或工作品質下降；需要頻繁安撫才能繼續執行",
+    2:"能在日常壓力下維持基本工作，但截止日臨近或需求衝突時表現明顯下滑",
+    3:"能在常見工作壓力下維持穩定輸出；遇到較大壓力時能主動求助或調整工作方式",
+    4:"在高壓情境下仍能維持工作品質；能識別自身壓力訊號並主動採取因應措施"
+  },
+  stress_m:{
+    1:"在多方壓力並行時頻繁失控；情緒波動影響團隊氣氛或跨部門合作",
+    2:"能應對單一壓力源，但多重壓力並行時優先序混亂，決策品質下降",
+    3:"能在多方壓力並行時維持穩定的工作節奏與決策品質；情緒管理不影響工作關係",
+    4:"在高強度、持續壓力下仍能保持清晰判斷；能有效管理自身與團隊的壓力狀態"
+  },
+  stress_a:{
+    1:"在組織層級的高風險或高模糊情境下容易退縮或過度謹慎；決策常延誤",
+    2:"能應對一般的組織壓力，但面對重大風險或輿論壓力時判斷保守",
+    3:"在組織層級的高壓情境（如重大變革、危機、輿論壓力）下能維持穩定決策與領導",
+    4:"在高度不確定與高風險情境中仍展現沉著與方向感；能有效穩定組織信心"
+  },
+  ai_i:{
+    1:"未使用過AI工具，或使用後無法判斷輸出品質；對AI抱持抗拒或盲目信任",
+    2:"能操作基本AI工具，但Prompt缺乏針對性；對AI輸出僅做表面確認",
+    3:"能有效使用主流AI工具完成工作任務；能撰寫基本Prompt並對輸出進行查核",
+    4:"能優化Prompt以提升輸出品質；主動探索新工具並分享給同儕"
+  },
+  ai_m:{
+    1:"AI工具停留在基本使用，未整合進工作流程；無法評估AI輸出的倫理風險",
+    2:"能使用AI完成部分工作，但整合度低；對AI倫理問題有基本意識但缺乏實踐",
+    3:"能設計AI輔助的工作流程（如摘要、草稿、資料整理）；具備AI倫理查核意識",
+    4:"能系統性優化AI工作流程並提升團隊效率；能評估不同工具的適用性"
+  },
+  ai_a:{
+    1:"對AI趨勢缺乏掌握；無法評估AI工具的組織導入價值",
+    2:"能理解主要AI趨勢，但轉化為組織應用的能力有限",
+    3:"能評估AI工具的導入效益，設計團隊層級的應用策略",
+    4:"能主導AI工具的選型與導入規劃；有效追蹤趨勢並轉化為組織行動"
+  },
+  train_i:{
+    1:"知識整理雜亂，無法有效傳達給他人；一對一示範缺乏條理",
+    2:"能進行基本知識分享，但缺乏系統性；協助製作教材時需大量指導",
+    3:"能清楚整理個人知識並進行有效分享；協助製作教材品質可靠；一對一示範清晰",
+    4:"知識傳達能力超越期待；能主動識別他人的理解落差並調整說明方式"
+  },
+  train_m:{
+    1:"無法獨立設計有效課程；工作坊或小組帶領缺乏方向，學員反饋差",
+    2:"能設計基本課程架構，但學習目標不清晰；帶領工作坊時引導能力不足",
+    3:"能獨立設計課程並設定清晰的學習目標；有效帶領工作坊，能根據學員狀況即時調整",
+    4:"課程設計具深度且參與感強；能精準診斷學員學習障礙並提供針對性支持"
+  },
+  train_a:{
+    1:"無法診斷組織培訓需求；培訓體系架構不完整，缺乏成效評估機制",
+    2:"能規劃部分培訓體系，但需求診斷不夠深入；成效評估指標不清晰",
+    3:"能診斷組織培訓需求並規劃完整培訓體系；建立明確的成效評估與持續優化機制",
+    4:"培訓體系設計具前瞻性；成效數據被有效運用，持續提升組織整體能力"
+  },
+  lead_i:{
+    1:"自我管理能力不足，常需他人提醒基本工作責任；對同儕缺乏正向影響力",
+    2:"能完成自身工作，但少主動承擔；在同儕協作中被動跟隨",
+    3:"展現責任感與主動性，能以身作則；主動協助新人融入或支援同儕",
+    4:"在同儕中具備自然的影響力；能在無正式職權下帶動他人朝共同目標前進"
+  },
+  lead_m:{
+    1:"無法有效帶領小組或分派任務；成員發展停滯，團隊士氣低落",
+    2:"能帶領小組完成任務，但任務分派不均；成員回饋給予不足或流於表面",
+    3:"能有效帶領小組並公平分派任務；定期給予成員具體回饋，維護團隊共識與士氣",
+    4:"小組績效超越期待；能識別成員發展需求並提供針對性支持與成長機會"
+  },
+  lead_a:{
+    1:"無法有效影響跨部門利害關係人；組織文化塑造或變革推動缺乏具體作為",
+    2:"能與跨部門建立合作關係，但影響力有限；變革推動常遭遇阻力且缺乏有效因應",
+    3:"能有效影響跨部門利害關係人；能溝通清晰的願景，並推動有意義的組織文化或變革",
+    4:"跨部門影響力強，能在複雜政治環境中推動重大變革；人才培育體系有具體成果"
+  }
+};
+
+// 為專業技能補充行為描述
+const PRO_BEHAVIORS = {
+  proj_plan:{
+    1:"無法理解企劃目標或自行蒐集相關資料；參與企劃工作時需大量引導",
+    2:"能協助資料蒐集與競品研究，但整合能力不足；局部撰寫企劃書時缺乏架構",
+    3:"能理解企劃目標，協助完成企劃書的指定段落；資料品質可靠，能配合提案節奏",
+    4:"能主動提出有洞察的研究發現；局部撰寫的內容品質超越期待，有助提升整體企劃"
+  },
+  proj_mgmt:{
+    1:"無法追蹤自己的任務進度；會議紀錄缺漏，行動項目不清楚；依賴他人提醒所有截止日",
+    2:"能記錄任務清單，但更新不及時；工具使用基本，缺乏整體時程概念",
+    3:"能使用任務追蹤工具並準時更新進度；會議紀錄清晰完整，行動項目明確",
+    4:"能主動識別任務間的相依關係，預警潛在延誤；甘特圖或里程碑使用熟練"
+  },
+  mkt:{
+    1:"無法理解行銷目標或策略邏輯；執行任務時缺乏對整體企劃方向的認識",
+    2:"能配合執行行銷任務，但對目標受眾或品牌定位理解淺薄；無法獨立提出有根據的建議",
+    3:"能理解行銷目標與受眾定位，協助完成企劃指定環節；能主動提出有參考價值的執行建議",
+    4:"對行銷邏輯有清楚理解；能獨立執行完整的行銷任務，並根據數據反饋提出調整建議"
+  },
+  event:{
+    1:"行政準備不完整，常遺漏物料或場地細節；現場應變混亂，需大量指導",
+    2:"能完成基本行政工作，但需主管頻繁確認；活動文案撰寫基本可用",
+    3:"能獨立完成活動行政準備（場地、物料、名單）；執行當天流程配合順暢",
+    4:"行政準備超越期待，細節完整；能主動識別執行風險並提前因應"
+  },
+  content:{
+    1:"書面表達混亂，信件或會議紀錄常有重大遺漏；需大量校正才能使用",
+    2:"能完成基本工作文件，但訊息結構不清楚；語句偶有歧義或冗贅",
+    3:"工作文件撰寫清晰完整；信件、會議紀錄、基本文案達到可直接使用的品質",
+    4:"文字簡潔有力，結構清晰；能根據不同受眾調整語氣，輸出品質超越期待"
+  },
+  digital_ad:{
+    1:"無法獨立完成基本廣告設定；不理解廣告受眾、版位與出價的基本邏輯",
+    2:"能在指導下完成廣告設定，但受眾設定與素材搭配缺乏邏輯；無法主動解讀數據",
+    3:"能獨立在主要平台（如Meta、Google）完成廣告設定與發布；能追蹤基本指標（CTR、CPC）並回報",
+    4:"能根據數據主動優化廣告（受眾、素材、出價）；能識別表現異常並提出調整方案"
+  },
+  media:{
+    1:"新聞稿撰寫結構混亂，缺乏新聞價值判斷；無法獨立準備基本媒體素材",
+    2:"能完成基本新聞稿初稿，但新聞角度不精準；媒體聯繫被動，缺乏與媒體互動的基本禮儀",
+    3:"能獨立撰寫結構完整的新聞稿，掌握基本的新聞角度；與媒體聯繫專業且有效率",
+    4:"新聞稿品質穩定且具新聞吸引力；能主動維護媒體名單，識別需要特別關注的媒體關係"
+  },
+  present:{
+    1:"簡報結構混亂，重點不明；視覺設計雜亂或過度裝飾；現場表達緊張且難以傳達核心訊息",
+    2:"能產出基本可用的簡報，但邏輯架構薄弱；現場說明依賴逐字稿，缺乏互動感",
+    3:"能獨立製作結構清晰、視覺整潔的簡報；現場說明流暢，能清楚傳達核心訊息",
+    4:"簡報邏輯嚴謹且視覺有層次；能根據受眾調整深度與語氣，現場能有效引導討論"
+  },
+  market_res:{
+    1:"無法獨立蒐集或整理有效的市場資料；資料來源不可靠，分析停留在資料羅列",
+    2:"能蒐集基本的競品或市場資料，但缺乏分析架構；洞察淺薄，難以轉化為有用的建議",
+    3:"能獨立蒐集可靠資料並進行有架構的競品或市場分析；能提出有參考價值的初步洞察",
+    4:"分析品質超越期待；能交叉比對多元資料來源，找出隱藏的市場機會或風險訊號"
+  },
+  social:{
+    1:"不主動追蹤社群訊息；回應延遲或語氣不一致；無法辨識需要特別處理的留言",
+    2:"能定時查看並回應基本訊息，但語氣缺乏個性或溫度；遇到複雜情況需要主管指示",
+    3:"能及時且有溫度地回應社群訊息；能辨識一般問題與需要升級處理的狀況，並適當轉交",
+    4:"回應品質穩定且具品牌一致性；能主動整理社群回饋並提供有用的觀察給上層"
+  },
+  admin:{
+    1:"行政工作常出錯或延誤；無法獨立追蹤多項行政任務；依賴他人提醒每個步驟",
+    2:"能完成指定的行政任務，但細節掌握不穩定；流程記錄不完整，需頻繁確認",
+    3:"能準確且及時完成行政工作；主動建立個人的任務追蹤機制，確保不遺漏",
+    4:"行政工作準確率高且效率超越期待；能主動識別流程異常並在問題放大前提早處理"
+  },
+  budget:{
+    1:"缺乏基本成本意識；無法追蹤自身工作相關的費用支出；報帳或申請流程常出錯",
+    2:"能完成基本報帳與費用申請，但缺乏對預算限制的主動意識；需提醒才會控制花費",
+    3:"具備基本成本意識，能在預算範圍內規劃工作所需資源；主動追蹤相關費用並回報異常",
+    4:"能有效管理負責範疇的預算，主動識別超支風險並提出調整建議；資源使用效益清楚可追蹤"
+  },
+  office:{
+    1:"基本辦公軟體操作生疏；Word、Excel、PowerPoint等核心功能使用錯誤或需頻繁查詢",
+    2:"能完成基本的文件撰寫與表格整理，但格式排版不整齊；公式與功能應用有限",
+    3:"能熟練使用Word、Excel、PowerPoint完成日常工作需求；格式整潔，功能應用正確",
+    4:"辦公軟體應用能力超越同儕；能使用進階功能（如Excel樞紐分析、PowerPoint動畫）提升工作品質"
+  },
+  flow:{
+    1:"缺乏流程思維；執行工作時不會思考效率，對重複性問題接受現狀而不尋求改善",
+    2:"能識別明顯的工作低效，但優化建議缺乏結構；改善行動停留在個人習慣調整",
+    3:"能識別個人工作中的低效環節，提出有邏輯的改善建議，並實際執行優化",
+    4:"流程優化意識強；能系統性分析個人工作流程，設計可複製的高效工作方式並分享"
+  },
+  event_exec:{
+    1:"行政準備不完整，常遺漏物料；現場應變混亂，需大量指導協助才能執行",
+    2:"能完成基本行政工作，但執行當天需主管頻繁確認各項細節",
+    3:"能獨立完成活動行政準備並執行當天流程；能在現場彈性處理突發狀況",
+    4:"執行能力成為活動成功的關鍵支柱；能主動預警執行風險並提前協調"
+  },
+  visual:{
+    1:"設計輸出品質不穩定，常需大量修改；不了解品牌視覺規範，工具操作基礎薄弱",
+    2:"能完成簡單的圖片或短影音素材，但品質不穩定；風格與品牌調性常有落差",
+    3:"能依品牌規範獨立完成社群素材或行銷物件；視覺整潔，能根據回饋有效修改",
+    4:"設計輸出品質穩定且具視覺吸引力；能主動提出視覺優化建議，輸出效率高"
+  },
+  multimedia:{
+    1:"無法獨立完成基本多媒體素材；工具操作不熟練，常需大量修改；不了解品牌視覺規範",
+    2:"能完成簡單的圖片或短影音素材，但品質不穩定；風格與品牌調性常有落差",
+    3:"能獨立產出符合品牌調性的基本多媒體素材（靜態圖、短影音等）；品質穩定，能在時限內交付",
+    4:"內容產出品質超越期待；能根據平台特性調整內容格式，並主動優化呈現效果"
+  },
+  video:{
+    1:"無法獨立完成基本影音素材；剪輯或後製工具操作生疏，輸出品質不達標",
+    2:"能完成簡單的短影音剪輯，但節奏感、字幕或配樂掌握不穩定；需大量修改才能使用",
+    3:"能獨立完成符合平台規格的基本影音素材；剪輯節奏、字幕與配樂處理穩定，能如期交付",
+    4:"影音品質超越期待；能主動優化視聽體驗，掌握平台演算法偏好並反映在製作決策上"
+  },
+  content_c:{
+    1:"書面表達混亂，信件或文案常有重大遺漏；需大量校正才能使用",
+    2:"能完成基本文案，但訊息結構不清楚；語句偶有歧義或缺乏品牌一致性",
+    3:"能依品牌語調獨立撰寫文案；文字清晰有溫度，能針對不同平台調整風格",
+    4:"文字簡潔有力，具品牌識別度；能在緊湊時程內產出高品質且具傳播力的內容"
+  },
+  news:{
+    1:"缺乏基本的議題敏感度；無法獨立判斷選題方向，採訪前準備不足，約訪溝通生疏",
+    2:"能在指導下執行採訪任務，但選題缺乏自主判斷；媒體識讀能力薄弱，難以辨別資訊可信度",
+    3:"具備基本媒體識讀能力，能辨別可信來源與資訊偏誤；能協助執行選題，完成基本約訪與採訪前準備",
+    4:"能主動提出有初步依據的選題方向，說明受眾切入點；能獨立完成約訪，採訪執行有條理"
+  },
+  web_c:{
+    1:"無法獨立更新或維護網站內容；不了解基本的CMS操作或網站結構邏輯",
+    2:"能在CMS中完成基本內容更新，但缺乏對SEO或使用者體驗的基本認識",
+    3:"能獨立維護網站內容，了解基本SEO原則；能追蹤基本流量數據（GA等）並回報異常",
+    4:"能根據數據提出具體的內容或結構優化建議；SEO操作有效，能主動識別改善機會"
+  },
+  biz_dev:{
+    1:"缺乏基本的業務溝通能力；無法獨立進行客戶開發或需求訪談；提案準備不足",
+    2:"能配合執行業務任務，但需求識別能力薄弱；客戶溝通被動，提案缺乏針對性",
+    3:"能獨立進行基本客戶拜訪與需求訪談；能提出有針對性的初步提案，與客戶維持良好互動",
+    4:"業務溝通能力強；能深入識別客戶隱性需求，提案命中率高，能有效推進商機"
+  },
+  client:{
+    1:"客戶或利害關係人互動被動且缺乏專業感；無法獨立處理基本的客戶聯繫或需求回應",
+    2:"能完成基本的客戶聯繫工作，但互動缺乏溫度與針對性；遇到複雜情況需主管介入",
+    3:"能主動且專業地維護客戶或利害關係人關係；能有效回應需求，識別需升級處理的情況",
+    4:"關係維護品質超越期待；能主動識別潛在風險並在問題擴大前提早處理，獲得客戶信任"
+  },
+  partner:{
+    1:"對異業合作的邏輯和目標缺乏基本理解；對接執行不準確，常造成資訊落差或延誤",
+    2:"能配合執行合作任務，但缺乏對合作目的與雙方利益的清楚認識；與夥伴溝通被動",
+    3:"能理解合作目標與執行細節，有效配合完成對接工作；與外部夥伴溝通專業且有效率",
+    4:"執行對接能力超越期待；能主動識別執行風險並提早協調，確保合作順利落地"
+  },
+  complex:{
+    1:"無法清楚說明複雜或創新產品的核心價值；客戶互動停留在功能介紹，缺乏需求連結",
+    2:"能介紹產品基本功能，但說明邏輯不夠流暢；難以識別客戶痛點，說服力有限",
+    3:"能清楚說明複雜產品的核心價值，有效連結客戶需求；能獨立完成基本的銷售流程",
+    4:"銷售溝通能力強；能深入識別客戶痛點，將複雜價值主張轉化為客戶語言，提升成交率"
+  },
+  industry:{
+    1:"學習主動性不足；入職後長時間無法清楚描述組織的產業位置或核心產品，需反覆提醒",
+    2:"能逐步建立基本的產業與產品知識，但學習節奏慢；知識停留在背誦，難以活用在工作中",
+    3:"能在合理時間內主動建立對產業特性與核心產品的清楚理解；能將知識應用在日常工作中",
+    4:"學習速度明顯快於同儕；能快速建立有深度的產業洞察，並將知識主動運用在提升工作品質上"
+  },
+  present_s:{
+    1:"簡報結構混亂，重點不明；客戶面前表達緊張且難以傳達核心訊息，缺乏說服力",
+    2:"能產出基本可用的簡報，但業務邏輯薄弱；現場說明依賴逐字稿，缺乏互動感",
+    3:"能獨立製作結構清晰的業務提案簡報；現場說明流暢，能針對客戶需求調整說明重點",
+    4:"簡報邏輯嚴謹且具說服力；能根據不同決策者調整切入點，現場能有效推進商業共識"
+  },
+  data:{
+    1:"無法獨立操作基本數據工具；面對數據時不知道如何下手，需要全程協助",
+    2:"能操作Excel進行基本的資料整理與加總，但公式應用有限；無法自行產出有意義的分析",
+    3:"能使用Excel或基礎BI工具進行資料整理與基本視覺化；能回答明確的數據問題",
+    4:"能使用樞紐分析表、基本函數（VLOOKUP、IF、SUMIF等）進行有效分析；能主動從數據中發現問題或機會"
+  },
+  web:{
+    1:"無法獨立更新或維護網站內容；不了解基本的CMS操作或網站結構邏輯",
+    2:"能在CMS中完成基本內容更新，但缺乏對SEO或使用者體驗的基本認識",
+    3:"能獨立維護網站內容，了解基本SEO原則；能追蹤基本流量數據（GA等）並回報異常",
+    4:"能根據數據提出具體的內容或結構優化建議；SEO操作有效，能主動識別改善機會"
+  },
+  code:{
+    1:"程式基礎薄弱；無法獨立完成基本功能開發，除錯能力不足，常需他人協助解決基礎問題",
+    2:"能完成簡單的程式任務，但程式碼結構不清晰；解決問題過度依賴搜尋或他人，缺乏獨立思考",
+    3:"能獨立完成指定的功能開發，程式碼可讀且有基本結構；能自主除錯並解決常見問題",
+    4:"開發能力超越同儕；程式碼架構清晰，能考量效能與可維護性；學習新技術速度快"
+  },
+  product:{
+    1:"缺乏用戶導向的基本思維；無法識別用戶需求與產品問題，以組織視角而非用戶視角看待問題",
+    2:"能收集用戶回饋，但整理與分析能力有限；提出的建議缺乏具體的用戶行為依據",
+    3:"能主動收集、整理並分析用戶回饋；能從用戶視角識別產品問題並提出有依據的改善建議",
+    4:"用戶洞察能力超越期待；能從多元管道萃取有效用戶洞察，識別深層需求與未被滿足的痛點"
+  },
+  web_tech:{
+    1:"對網頁基礎技術完全陌生；無法理解基本的HTML結構或CSS語法，技術溝通困難",
+    2:"能理解基本的HTML標籤與CSS概念，但無法獨立進行修改；依賴技術人員處理所有網頁問題",
+    3:"能讀懂基本的HTML/CSS並進行簡單修改；能獨立在CMS中完成內容與樣式的基本調整",
+    4:"網頁基礎技術應用能力超越同儕；能用HTML/CSS解決常見的頁面問題，減少對工程師的依賴"
+  },
+  digital_ad_t:{
+    1:"無法獨立完成基本廣告設定；不理解廣告受眾、版位與出價的基本邏輯",
+    2:"能在指導下完成廣告設定，但受眾設定與素材搭配缺乏邏輯；無法主動解讀數據",
+    3:"能獨立在主要平台完成廣告設定與發布；能追蹤基本指標（CTR、CPC）並回報",
+    4:"能根據數據主動優化廣告（受眾、素材、出價）；能識別表現異常並提出調整方案"
+  }
+};
+
+const SKILLS_COMMON = [
+  {id:"comm_i",name:"初階溝通協調能力",concepts:"日常工作需求表達、跨部門窗口聯繫、書面與口頭訊息傳遞清晰",q:"請描述一次需要協調多方才能推進的工作，你如何做到的？"},
+  {id:"comm_m",name:"中階溝通協調能力",concepts:"跨單位需求協調與衝突處理、會議主持、多方利害關係人溝通",q:"請描述一次多方衝突的協調經驗，你如何推動共識？"},
+  {id:"comm_a",name:"進階溝通協調能力",concepts:"資源與優先序談判、對外夥伴關係維護、公眾表達與簡報說服力",q:"請描述一次你代表組織進行重要對外溝通的經驗。"},
+  {id:"exec_i",name:"初階工作執行力",concepts:"任務理解與準時交付、工作優先序判斷、主動回報進度",q:"請舉例同時處理多項任務時如何排優先序？"},
+  {id:"exec_m",name:"中階工作執行力",concepts:"多任務並行管理、主動預判風險、自主優化工作流程",q:"請描述一次你主動預警潛在問題並提前處理的例子。"},
+  {id:"exec_a",name:"進階工作執行力",concepts:"跨組織資源調度、建立可複製的執行標準與SOP、驅動他人達成目標",q:"請描述你如何建立可複製的執行標準或SOP。"},
+  {id:"logic_i",name:"初階邏輯思考與解決問題",concepts:"問題描述與拆解、蒐集資訊提出解法、基本因果關係辨識",q:"請描述一次你獨立解決困難問題的過程。"},
+  {id:"logic_m",name:"中階邏輯思考與解決問題",concepts:"結構化分析框架（5W1H、魚骨圖）、多方案比較與利弊評估",q:"請描述一次你用結構化方法分析並解決問題的例子。"},
+  {id:"logic_a",name:"進階邏輯思考與解決問題",concepts:"系統性思考與跨域影響預判、模糊情境下的決策判斷",q:"請描述一次在高度不確定情境下做出重要決策的經驗。"},
+  {id:"adapt_i",name:"初階適應力與團隊合作",concepts:"正向面對工作變動、主動配合團隊、識別自己能貢獻的角色",q:"請描述一次工作方式突然改變的經驗，你如何調整？"},
+  {id:"adapt_m",name:"中階適應力與團隊合作",concepts:"在工作模式改變時迅速重新定向、跨部門合作中建立共識",q:"請描述一次在跨部門合作中化解歧見的例子。"},
+  {id:"adapt_a",name:"進階適應力與團隊合作",concepts:"在組織重大變動中帶領團隊重新定向、跨組織有效影響力",q:"請描述一次你帶領團隊應對重大組織變動的經驗。"},
+  {id:"learn_i",name:"初階學習新方法、新工具的能力",concepts:"主動上手新工具並在工作中應用、遇問題自行尋找資源",q:"請舉例你最近主動學習了什麼新工具或方法，如何應用在工作上？"},
+  {id:"learn_m",name:"中階學習新方法、新工具的能力",concepts:"快速評估新工具的適用性並整合進工作流程",q:"請描述你如何評估一個新工具是否適合導入工作流程。"},
+  {id:"learn_a",name:"進階學習新方法、新工具的能力",concepts:"持續掌握領域新方法論並評估組織應用價值",q:"請描述你如何推動跨部門採用新方法或工具。"},
+  {id:"stress_i",name:"初階抗壓性",concepts:"在常見工作壓力下維持穩定輸出、遇較大壓力主動調整",q:"請描述一次工作壓力特別大的時期，你如何應對？"},
+  {id:"stress_m",name:"中階抗壓性",concepts:"在多方壓力並行時維持穩定工作節奏與決策品質",q:"請描述一次多重壓力並行的時期，你如何排序並應對？"},
+  {id:"stress_a",name:"進階抗壓性",concepts:"在組織高壓情境（重大變革、危機）下維持穩定決策與領導",q:"請描述一次組織層級的危機情境，你如何應對？"},
+  {id:"ai_i",name:"初階AI運用與素養",concepts:"基本AI工具操作（ChatGPT、Claude）、Prompt撰寫、AI輸出品質判讀",q:"你目前如何在工作中使用AI工具？可以舉一個具體的例子嗎？"},
+  {id:"ai_m",name:"中階AI運用與素養",concepts:"Prompt優化與情境設計、AI輔助工作流整合、AI倫理查核意識",q:"請描述你設計過最有效的一個AI應用工作流程。"},
+  {id:"ai_a",name:"進階AI運用與素養",concepts:"AI工具選型與導入評估、設計AI輔助的團隊工作流程",q:"請描述你如何評估並推動AI工具的組織導入。"},
+  {id:"train_i",name:"初階培訓能力",concepts:"個人知識整理與分享、協助教材製作、一對一示範",q:"請描述一次你教導或培訓他人的經驗。"},
+  {id:"train_m",name:"中階培訓能力",concepts:"課程設計與學習目標設定、工作坊帶領與引導",q:"請描述你設計並執行過的一門課程或工作坊。"},
+  {id:"train_a",name:"進階培訓能力",concepts:"組織培訓需求診斷與規劃、培訓體系架構設計",q:"請描述你如何診斷組織培訓需求並規劃培訓體系。"},
+  {id:"lead_i",name:"初階領導能力",concepts:"自我管理與以身作則、展現主動性與責任感",q:"請描述一次你在無正式職權下帶動他人的經驗。"},
+  {id:"lead_m",name:"中階領導能力",concepts:"小組帶領與任務分派、成員發展支持與日常回饋",q:"請描述你帶領小組的方式，你如何分派任務並給予回饋？"},
+  {id:"lead_a",name:"進階領導能力",concepts:"跨部門影響力與願景溝通、人才培育體系建立",q:"請描述一次你推動重大組織變革的經驗。"},
+];
+
+const SKILLS_PRO = {
+  P:[
+    {id:"proj_plan",name:"專案企劃",concepts:"企劃書撰寫、受眾定義、策略性企劃思維、提案與執行",q:"請描述一個你參與或主導過的企劃案，你負責哪些部分？"},
+    {id:"proj_mgmt",name:"專案管理",concepts:"任務追蹤、里程碑設定、風險識別與應對、多專案統籌",q:"請描述一個你管理過的專案，如何確保進度？"},
+    {id:"mkt",name:"行銷企劃策略",concepts:"目標設定、策略邏輯、跨管道整合、數據導向調整",q:"請描述一個你主導過的行銷企劃，如何設定目標與評估成效？"},
+    {id:"event",name:"活動企劃",concepts:"活動概念設計、流程規劃、廠商接洽、參與者體驗設計",q:"請描述一個你主導規劃的活動，遇到突發狀況如何應對？"},
+    {id:"content",name:"內容與文案撰寫",concepts:"文案撰寫、內容產製、對內/對外調整語氣、敘事架構",q:"請舉例說明你最近寫過的一份文件或文案，你如何決定結構與語氣？"},
+    {id:"digital_ad",name:"數位廣告投放與追蹤",concepts:"廣告設定、CTR/CPC/ROAS追蹤、跨平台整合、A/B測試",q:"請描述你操作過的廣告投放案例，如何根據數據優化成效？"},
+    {id:"media",name:"媒體公關能力",concepts:"新聞稿撰寫、媒體聯繫、議題操作、危機應對",q:"請描述你與媒體互動的經驗，有沒有處理過負面報導的例子？"},
+    {id:"present",name:"提案與簡報技巧",concepts:"簡報架構、說服力、策略性敘事、質疑應對",q:"請描述一次你做過最重要的提案，對方有什麼質疑，你如何應對？"},
+    {id:"market_res",name:"市場研究與產業分析",concepts:"競品分析、消費者洞察、產業趨勢、策略性洞察建議",q:"請描述你做過最完整的一次市場研究，你如何設計研究方法？"},
+    {id:"social",name:"社群關係維護",concepts:"社群回應、關係深化、危機識別、社群策略",q:"請描述你如何維護與某個社群的關係？"},
+  ],
+  B:[
+    {id:"admin",name:"行政與流程管理",concepts:"行政工作準確性及時性、SOP設計、流程異常處理",q:"請描述你管理過最複雜的行政流程。"},
+    {id:"budget",name:"預算與資源管理",concepts:"成本意識、預算編列與執行、策略性資源配置",q:"請描述你管理過的預算規模與方式，有沒有超支的例子？"},
+    {id:"proj_mgmt",name:"專案管理",concepts:"任務追蹤、里程碑設定、跨成員協作推動",q:"請描述一個你管理過的專案，如何確保進度？"},
+    {id:"office",name:"基礎辦公軟體",concepts:"Excel/Word/PowerPoint進階應用、工作流程整合",q:"請描述你在工作中如何使用辦公軟體提升效率？"},
+    {id:"flow",name:"流程優化力",concepts:"識別低效環節、改善建議、推動跨部門優化",q:"請描述你識別並改善過的一個工作流程。"},
+    {id:"event_exec",name:"活動執行",concepts:"活動行政準備、執行當天流程配合、現場應變",q:"請描述一個你執行的活動，遇到突發狀況如何應對？"},
+  ],
+  C:[
+    {id:"visual",name:"視覺設計",concepts:"品牌視覺規範、設計系統、視覺策略、設計軟體應用",q:"請描述你最近完成的一件設計作品，你如何決定視覺方向？"},
+    {id:"multimedia",name:"多媒體內容產出",concepts:"靜態圖、短影音、品牌視覺一致性、素材製作標準",q:"請描述你製作過的多媒體內容，你的工具與工作流程是什麼？"},
+    {id:"video",name:"影音製作",concepts:"前期企劃、拍攝、後製流程統籌、平台格式規格",q:"請描述你主導或參與過的影音製作，你負責哪些環節？"},
+    {id:"content_c",name:"內容與文案撰寫",concepts:"文案撰寫、品牌語調、內容規劃與敘事架構",q:"請舉例說明你最近寫過的一份文案，你如何確保符合品牌語調？"},
+    {id:"news",name:"新聞採編與議題判斷力",concepts:"選題邏輯、約訪能力、議題辨識、媒體識讀",q:"請描述你最近提出或執行過的一個選題，你如何判斷它有報導價值？"},
+    {id:"web_c",name:"網站企劃與優化",concepts:"SEO/UX優化、數據診斷、網站內容管理",q:"請描述你參與或主導過的網站優化案例。"},
+  ],
+  S:[
+    {id:"biz_dev",name:"業務拓展與顧問服務",concepts:"客戶開發、顧問式銷售、業務週期管理、解決導向提案",q:"請描述你開發過最具挑戰性的一個客戶，你如何建立信任？"},
+    {id:"client",name:"客戶關係與利害關係人管理",concepts:"主動維護、多方平衡、衝突預防、高層關係建立",q:"請描述一次你需要同時管理多方利害關係人的經驗。"},
+    {id:"partner",name:"異業合作",concepts:"合作機會識別、條件洽談、策略整合、夥伴關係維護",q:"請描述一次你洽談或執行過的異業合作，你如何找到合作切入點？"},
+    {id:"complex",name:"銷售較複雜或創新產品的能力",concepts:"價值主張傳遞、多方決策者應對、顧問式銷售",q:"請描述你銷售過最複雜的一個產品或方案，最大的銷售障礙是什麼？"},
+    {id:"industry",name:"快速了解產業特性及所銷售產品",concepts:"主動學習產業知識、轉化為工作優勢、建立專業感",q:"請描述你過去進入一個新產業的學習過程，最有效的學習方式是什麼？"},
+    {id:"present_s",name:"提案與簡報技巧",concepts:"提案架構、說服力、決策者切入點、質疑應對",q:"請描述一次你做過最重要的提案，對方有什麼質疑，你如何應對？"},
+  ],
+  T:[
+    {id:"data",name:"數據分析工具",concepts:"Excel/BI/SQL應用、視覺化報告、預測性分析",q:"請描述你如何使用數據工具解決過一個工作問題？"},
+    {id:"web",name:"網站企劃與優化",concepts:"SEO/UX優化、GA數據診斷、改版統籌",q:"請描述你參與或主導過的網站優化案例。"},
+    {id:"code",name:"程式開發能力",concepts:"功能開發、系統架構設計、完整開發週期能力",q:"請描述你最近完成的一個開發專案或功能，你如何設計架構？"},
+    {id:"product",name:"用戶導向的產品營運能力",concepts:"用戶回饋分析、產品優化、成效指標追蹤",q:"請描述你如何收集並應用用戶回饋改善產品或服務？"},
+    {id:"web_tech",name:"網頁基礎技術",concepts:"HTML5/CSS3/Bootstrap、jQuery、CMS操作",q:"請描述你在工作中應用網頁技術的經驗。"},
+    {id:"digital_ad_t",name:"數位廣告投放與追蹤",concepts:"廣告投放、追蹤架構（UTM/像素）、跨平台整合",q:"請描述你操作過的廣告投放案例，如何設定追蹤架構？"},
+  ]
+};
+
+const COMMON_DEFAULTS = {
+  P1:["comm_i","exec_i","logic_i","adapt_i","learn_i","ai_i"],
+  P2:["comm_m","exec_m","logic_m","adapt_m","stress_m","ai_m"],
+  P3:["comm_a","exec_a","logic_a","stress_m","lead_m","ai_m"],
+  P4:["logic_a","adapt_a","learn_a","stress_a","train_a","lead_a"],
+  B0:["comm_i","exec_i","adapt_i","learn_i","ai_i"],
+  B1:["comm_i","exec_i","logic_i","adapt_i","learn_i","ai_i"],
+  B2:["comm_m","exec_m","adapt_m","learn_m","ai_m"],
+  B3:["exec_a","logic_a","stress_m","ai_m","train_i","lead_i"],
+  B4:["exec_a","logic_a","adapt_a","stress_a","train_a","lead_a"],
+  C1:["comm_i","exec_i","adapt_i","learn_i","stress_i","ai_i"],
+  C2:["comm_m","exec_m","adapt_m","learn_m","ai_m","train_i"],
+  C3:["adapt_a","learn_a","stress_m","ai_m","train_m","lead_m"],
+  C4:["logic_a","adapt_a","learn_a","stress_a","train_a","lead_a"],
+  S1:["comm_m","logic_i","adapt_i","learn_i","stress_i","ai_i"],
+  S2:["comm_m","exec_m","logic_m","adapt_m","stress_m","ai_m"],
+  S3:["comm_a","exec_a","adapt_a","stress_m","train_i","lead_i"],
+  S4:["logic_a","adapt_a","learn_a","stress_a","train_a","lead_m"],
+  T1:["comm_i","exec_i","logic_i","learn_i","stress_i","ai_i"],
+  T2:["logic_m","adapt_m","learn_m","stress_m","ai_m"],
+  T3:["exec_a","logic_a","learn_a","ai_m","train_m","lead_m"],
+  T4:["logic_a","adapt_a","learn_a","stress_a","ai_a","train_a"]
+};
+
+const PRO_DEFAULTS = {
+  P1:["proj_plan","event","content"],
+  P2:["proj_plan","proj_mgmt","mkt","content"],
+  P3:["proj_mgmt","mkt","digital_ad","media"],
+  P4:["mkt","media","market_res","present"],
+  B0:["admin","office"],
+  B1:["admin","budget","office"],
+  B2:["admin","budget","proj_mgmt","flow"],
+  B3:["budget","proj_mgmt","flow"],
+  B4:["budget","proj_mgmt","flow"],
+  C1:["visual","multimedia","content_c"],
+  C2:["visual","multimedia","video","content_c"],
+  C3:["visual","video","news","content_c"],
+  C4:["visual","video","news"],
+  S1:["biz_dev","client","industry","complex"],
+  S2:["biz_dev","client","partner","complex"],
+  S3:["biz_dev","client","partner"],
+  S4:["biz_dev","client","present_s"],
+  T1:["data","web","code"],
+  T2:["data","web","code","product"],
+  T3:["data","web","code","product"],
+  T4:["data","code","product"]
+};
+
+function getBehavior(id){ return BEHAVIORS[id] || PRO_BEHAVIORS[id] || null; }
+
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let DB = { jobs: [] };   // 全部資料
+let CJ = null;           // current job index
+let CA = 0;              // current applicant index
+let CR = 1;              // current round (1/2/3)
+let curPage = 0;
+
+function curJob(){ return CJ !== null ? DB.jobs[CJ] : null; }
+function curApplicant(){ const j=curJob(); return j && j.applicants ? j.applicants[CA] : null; }
+
+// ══ JOB LIST ═══════════════════════════════════════════════════
+function renderJobList(){
+  const c = document.getElementById('job-list');
+  c.innerHTML = '';
+  if (!DB.jobs.length) { c.innerHTML = '<div style="font-size:12px;color:var(--ink3);padding:4px">尚無職缺</div>'; return; }
+  DB.jobs.forEach((j, i) => {
+    const d = document.createElement('div');
+    d.className = 'job-item' + (i === CJ ? ' active' : '');
+    const statusBadge = j.status === 'probation' ? '<span class="job-item-badge badge-probation">試用期</span>' :
+      (j.applicants && j.applicants.length ? '<span class="job-item-badge badge-interviewing">面試中</span>' :
+      '<span class="job-item-badge badge-draft">草稿</span>');
+    d.innerHTML = `<div class="job-item-title">${j.title || '（未命名職缺）'}</div>
+      <div class="job-item-meta">${j.roleKey || '—'} · ${j.dept || '未設部門'}</div>
+      ${statusBadge}`;
+    d.onclick = () => selectJob(i);
+    c.appendChild(d);
+  });
+}
+
+function addJob(){
+  DB.jobs.push({
+    title:'', dept:'', mgr:'', method:'對外徵才', date:'', jd:'',
+    series:null, level:null, roleKey:null,
+    selSkills: new Set(),
+    customSkills:[],
+    applicants:[],
+    probation:{ scores:{}, notes:{}, selfComment:'', mgrComment:'', result:'' },
+    status:'draft'
+  });
+  selectJob(DB.jobs.length - 1);
+  if (curPage !== 1) goTo(1);
+}
+
+function selectJob(i){
+  CJ = i; CA = 0; CR = 1;
+  renderJobList();
+  loadJobToForm();
+  if (curPage === 0) goTo(1);
+  else refreshCurrentPage();
+}
+
+function loadJobToForm(){
+  const j = curJob(); if (!j) return;
+  document.getElementById('job-title').value = j.title || '';
+  document.getElementById('job-dept').value  = j.dept  || '';
+  document.getElementById('job-mgr').value   = j.mgr   || '';
+  document.getElementById('job-method').value= j.method|| '對外徵才';
+  document.getElementById('job-date').value  = j.date  || '';
+  document.getElementById('job-jd').value    = j.jd    || '';
+
+  // Series/level UI
+  document.querySelectorAll('.series-btn').forEach(b => b.classList.toggle('sel', b.dataset.s === j.series));
+  if (j.series) renderLevelBtns(j.series);
+  if (j.roleKey) {
+    document.querySelectorAll('.level-btn').forEach(b => b.classList.toggle('sel', b.dataset.key === j.roleKey));
+    showRoleInfo(j.roleKey, j.level);
+    renderSkillsFromJob(j);
+  } else {
+    hideSkills();
+  }
+}
+
+function syncJobMeta(){
+  const j = curJob(); if (!j) return;
+  j.title  = document.getElementById('job-title').value;
+  j.dept   = document.getElementById('job-dept').value;
+  j.mgr    = document.getElementById('job-mgr').value;
+  j.method = document.getElementById('job-method').value;
+  j.date   = document.getElementById('job-date').value;
+  j.jd     = document.getElementById('job-jd').value;
+  renderJobList();
+}
+
+// ══ SERIES / LEVEL ════════════════════════════════════════════
+function pickSeries(btn){
+  const j = curJob(); if (!j) return;
+  document.querySelectorAll('.series-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  j.series = btn.dataset.s;
+  j.level = null; j.roleKey = null;
+  j.selSkills = new Set();
+  renderLevelBtns(j.series);
+  hideSkills();
+  document.getElementById('resp-card').style.display = 'none';
+  document.getElementById('role-display').innerHTML = '';
+}
+
+function renderLevelBtns(series){
+  const lvls = LEVELS[series] || [];
+  const cont = document.getElementById('level-btns');
+  cont.innerHTML = '';
+  lvls.forEach((lbl, i) => {
+    const key = lbl.split(' ')[0];
+    const cls = ['l1','l2','l3','l4'][Math.min(i,3)];
+    const b = document.createElement('button');
+    b.className = `level-btn ${cls}`;
+    b.textContent = lbl;
+    b.dataset.key = key;
+    b.onclick = () => pickLevel(b, key, lbl);
+    cont.appendChild(b);
+  });
+}
+
+function pickLevel(btn, key, lbl){
+  const j = curJob(); if (!j) return;
+  document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  j.level = lbl; j.roleKey = key;
+  // Set defaults only if no existing selection
+  if (!j.selSkills || !j.selSkills.size) {
+    const cd = COMMON_DEFAULTS[key] || [];
+    const pd = PRO_DEFAULTS[key] || [];
+    j.selSkills = new Set([...cd, ...pd]);
+  }
+  showRoleInfo(key, lbl);
+  renderSkillsFromJob(j);
+}
+
+function showRoleInfo(key, lbl){
+  const rd = document.getElementById('role-display');
+  rd.innerHTML = `<div class="role-badge rb-${key}">${key} ${(lbl||'').split(' ').slice(1).join(' ')}</div>`;
+  document.getElementById('resp-card').style.display = 'block';
+  document.getElementById('resp-text').textContent = RESP[key] || '';
+}
+
+function hideSkills(){
+  document.getElementById('skills-placeholder').style.display = 'block';
+  document.getElementById('skills-body').style.display = 'none';
+  document.getElementById('sel-count-area').style.display = 'none';
+}
+
+function renderSkillsFromJob(j){
+  document.getElementById('skills-placeholder').style.display = 'none';
+  document.getElementById('skills-body').style.display = 'block';
+  document.getElementById('sel-count-area').style.display = 'flex';
+
+  const sel = j.selSkills instanceof Set ? j.selSkills : new Set(j.selSkills);
+  j.selSkills = sel;
+
+  renderGroup('common-items', SKILLS_COMMON, sel);
+  renderGroup('pro-items', SKILLS_PRO[j.series] || [], sel);
+  renderCustomItems(j, sel);
+  updateSelCount(j);
+}
+
+function renderGroup(cid, skills, sel){
+  const c = document.getElementById(cid); c.innerHTML = '';
+  skills.forEach(sk => {
+    const d = document.createElement('div');
+    d.className = 'skill-item' + (sel.has(sk.id) ? ' sel' : '');
+    d.dataset.id = sk.id;
+    d.innerHTML = `<div class="skill-chk"></div><div><div class="skill-name">${sk.name}</div><div class="skill-concepts">${sk.concepts}</div></div>`;
+    d.onclick = () => toggleSkill(d, sk.id);
+    c.appendChild(d);
+  });
+}
+
+function renderCustomItems(j, sel){
+  const c = document.getElementById('custom-items'); c.innerHTML = '';
+  (j.customSkills || []).forEach((sk, i) => {
+    const d = document.createElement('div');
+    d.className = 'skill-item' + (sel.has(sk.id) ? ' sel' : '');
+    d.dataset.id = sk.id;
+    d.innerHTML = `<div class="skill-chk"></div><div style="flex:1"><div class="skill-name">${sk.name}</div>${sk.concepts ? `<div class="skill-concepts">${sk.concepts}</div>` : ''}</div><button onclick="removeCustomSkill(${i},event)" style="background:none;border:none;cursor:pointer;color:var(--ink3);font-size:14px;padding:0 4px;flex-shrink:0">✕</button>`;
+    d.onclick = (e) => { if (e.target.tagName !== 'BUTTON') toggleSkill(d, sk.id); };
+    c.appendChild(d);
+  });
+}
+
+function toggleSkill(el, id){
+  const j = curJob(); if (!j) return;
+  if (!(j.selSkills instanceof Set)) j.selSkills = new Set(j.selSkills);
+  if (j.selSkills.has(id)) { j.selSkills.delete(id); el.classList.remove('sel'); }
+  else { j.selSkills.add(id); el.classList.add('sel'); }
+  updateSelCount(j);
+}
+
+function updateSelCount(j){
+  const n = (j.selSkills instanceof Set ? j.selSkills.size : 0);
+  const badge = document.getElementById('sel-badge');
+  const msg = document.getElementById('sel-msg');
+  badge.textContent = `已選 ${n} 項`;
+  if (n < 6) { badge.className = 'badge badge-err'; msg.textContent = '建議至少 6 項'; }
+  else if (n <= 8) { badge.className = 'badge badge-ok'; msg.textContent = '✓ 符合建議範圍'; }
+  else { badge.className = 'badge badge-warn'; msg.textContent = '建議不超過 8 項'; }
+}
+
+function addCustomSkill(){
+  const j = curJob(); if (!j) return;
+  const name = document.getElementById('custom-skill-name').value.trim();
+  if (!name) { showToast('請填入技能名稱'); return; }
+  const concepts = document.getElementById('custom-skill-concepts').value.trim();
+  const id = 'custom_' + Date.now();
+  if (!j.customSkills) j.customSkills = [];
+  j.customSkills.push({ id, name, concepts, q:'請描述你在此方面的相關經驗。', isCustom:true });
+  if (!(j.selSkills instanceof Set)) j.selSkills = new Set(j.selSkills);
+  j.selSkills.add(id);
+  document.getElementById('custom-skill-name').value = '';
+  document.getElementById('custom-skill-concepts').value = '';
+  renderSkillsFromJob(j);
+  showToast('✓ 技能已新增', 'green');
+}
+
+function removeCustomSkill(i, e){
+  e.stopPropagation();
+  const j = curJob(); if (!j) return;
+  const id = j.customSkills[i].id;
+  j.customSkills.splice(i, 1);
+  if (j.selSkills instanceof Set) j.selSkills.delete(id);
+  renderSkillsFromJob(j);
+}
+
+function getSelSkillObjs(j){
+  if (!j) return [];
+  const sel = j.selSkills instanceof Set ? j.selSkills : new Set(j.selSkills);
+  const all = [...SKILLS_COMMON, ...(SKILLS_PRO[j.series]||[]), ...(j.customSkills||[])];
+  return all.filter(s => sel.has(s.id));
+}
+
+function toPage2(){
+  const j = curJob();
+  if (!j) return;
+  if (!j.series || !j.level) { showToast('請先選擇序列與職級'); return; }
+  const sel = j.selSkills instanceof Set ? j.selSkills : new Set(j.selSkills);
+  if (!sel.size) { showToast('請至少選擇一項技能'); return; }
+  if (!j.applicants || !j.applicants.length) {
+    j.applicants = [makeApplicant()];
+  }
+  CA = 0; CR = 1;
+  buildApplicantTabs();
+  loadApplicantToForm();
+  buildScoreRows();
+  goTo(2);
+}
+
+// ══ APPLICANTS ════════════════════════════════════════════════
+function makeApplicant(){
+  return { name:'', rounds:{
+    1:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''},
+    2:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''},
+    3:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''}
+  }};
+}
+
+function buildApplicantTabs(){
+  const j = curJob(); if (!j) return;
+  const c = document.getElementById('applicant-tabs'); c.innerHTML = '';
+  (j.applicants||[]).forEach((a, i) => {
+    const b = document.createElement('button');
+    b.className = 'applicant-tab' + (i === CA ? ' active' : '') + (a.name ? ' has-data' : '');
+    b.textContent = a.name || `應徵者 ${i+1}`;
+    b.onclick = () => { CA = i; switchApplicant(); };
+    c.appendChild(b);
+  });
+}
+
+function addApplicant(){
+  const j = curJob(); if (!j) return;
+  if (!j.applicants) j.applicants = [];
+  j.applicants.push(makeApplicant());
+  CA = j.applicants.length - 1;
+  CR = 1;
+  buildApplicantTabs();
+  loadApplicantToForm();
+  buildScoreRows();
+}
+
+function switchApplicant(){
+  buildApplicantTabs();
+  loadApplicantToForm();
+  switchRound(CR);
+}
+
+function loadApplicantToForm(){
+  const j = curJob(); if (!j) return;
+  const a = j.applicants[CA]; if (!a) return;
+  document.getElementById('a-name').value = a.name || '';
+  document.getElementById('a-role').value = (j.title || '（未命名）') + (j.roleKey ? ' — ' + j.roleKey : '');
+}
+
+function syncApplicant(){
+  const j = curJob(); if (!j || !j.applicants) return;
+  j.applicants[CA].name = document.getElementById('a-name').value;
+  buildApplicantTabs();
+}
+
+function switchRound(n){
+  CR = n;
+  [1,2,3].forEach(i => document.getElementById(`round-btn-${i}`).classList.toggle('active', i===n));
+  const j = curJob(); if (!j || !j.applicants || !j.applicants[CA]) return;
+  const r = j.applicants[CA].rounds[n] || {};
+  document.getElementById('r-date').value = r.date || '';
+  document.getElementById('r-interviewer').value = r.interviewer || '';
+  document.getElementById('r-comment').value = r.comment || '';
+  document.getElementById('r-result').value = r.result || '';
+  buildScoreRows();
+}
+
+function syncRound(){
+  const j = curJob(); if (!j || !j.applicants || !j.applicants[CA]) return;
+  const r = j.applicants[CA].rounds[CR];
+  r.date = document.getElementById('r-date').value;
+  r.interviewer = document.getElementById('r-interviewer').value;
+  r.comment = document.getElementById('r-comment').value;
+  r.result = document.getElementById('r-result').value;
+}
+
+function buildScoreRows(){
+  const j = curJob(); if (!j || !j.applicants || !j.applicants[CA]) return;
+  const skills = getSelSkillObjs(j);
+  const r = j.applicants[CA].rounds[CR];
+  const c = document.getElementById('score-rows'); c.innerHTML = '';
+  skills.forEach(sk => {
+    const curScore = r.scores[sk.id] || 0;
+    const curNote = r.notes[sk.id] || '';
+    const beh = getBehavior(sk.id);
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    const behId = 'beh_' + sk.id.replace(/[^a-zA-Z0-9]/g,'_');
+    const behHtml = beh ? `
+      <span class="behavior-toggle" onclick="toggleBehavior('${behId}')">▸ 查看行為描述</span>
+      <div class="behavior-box" id="${behId}">
+        ${[1,2,3,4].map(n=>`<div class="behavior-row"><div class="behavior-score bs${n}">${n}</div><div class="behavior-text">${beh[n]||''}</div></div>`).join('')}
+      </div>` : '';
+    row.innerHTML = `
+      <div class="score-top">
+        <div><div class="score-skill">${sk.name}</div><div class="score-concept">${sk.concepts}</div></div>
+        <div class="score-q-box">${sk.q}</div>
+      </div>
+      ${behHtml}
+      <div class="rating-wrap">
+        ${[1,2,3,4].map(n=>`<button class="rating-btn${curScore===n?' a'+n:''}" onclick="setScore('${sk.id}',${n},this)">${n}</button>`).join('')}
+      </div>
+      <div class="rating-labels"><span>待發展</span><span>發展中</span><span>符合期待</span><span>超越期待</span></div>
+      <textarea class="score-note-input" rows="2" placeholder="面試觀察筆記..." oninput="setNote('${sk.id}',this.value)">${curNote}</textarea>`;
+    c.appendChild(row);
+  });
+}
+
+function toggleBehavior(id){
+  const el = document.getElementById(id);
+  if (!el) return;
+  const open = el.classList.toggle('open');
+  el.previousElementSibling.textContent = (open ? '▾ ' : '▸ ') + '查看行為描述';
+}
+
+function setScore(id, score, btn){
+  const j = curJob(); if (!j || !j.applicants || !j.applicants[CA]) return;
+  j.applicants[CA].rounds[CR].scores[id] = score;
+  const grp = btn.closest('.rating-wrap');
+  grp.querySelectorAll('.rating-btn').forEach(b => { b.className='rating-btn'; });
+  btn.classList.add('a'+score);
+}
+function setNote(id, val){
+  const j = curJob(); if (!j || !j.applicants || !j.applicants[CA]) return;
+  j.applicants[CA].rounds[CR].notes[id] = val;
+}
+
+// ══ PROBATION ════════════════════════════════════════════════
+function buildProbRows(){
+  const j = curJob(); if (!j) return;
+  const skills = getSelSkillObjs(j);
+  const r1 = j.applicants?.[0]?.rounds?.[1] || {};
+  if (!j.probation) j.probation = { scores:{}, notes:{}, selfComment:'', mgrComment:'', result:'' };
+  const prob = j.probation;
+  const c = document.getElementById('prob-rows'); c.innerHTML = '';
+
+  // Pre-fill form
+  document.getElementById('p-name').value = j.applicants?.[0]?.name || '';
+  document.getElementById('p-mgr-name').value = j.mgr || '';
+  document.getElementById('p-self').value = prob.selfComment || '';
+  document.getElementById('p-mgr-comment').value = prob.mgrComment || '';
+  document.getElementById('p-result').value = prob.result || '';
+
+  skills.forEach(sk => {
+    const iS = r1.scores?.[sk.id] || 0;
+    const pS = prob.scores[sk.id] || 0;
+    const note = prob.notes[sk.id] || '';
+    const beh = getBehavior(sk.id);
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    const behId = 'pbeh_' + sk.id.replace(/[^a-zA-Z0-9]/g,'_');
+    const behHtml = beh ? `
+      <span class="behavior-toggle" onclick="toggleBehavior('${behId}')">▸ 查看行為描述</span>
+      <div class="behavior-box" id="${behId}">
+        ${[1,2,3,4].map(n=>`<div class="behavior-row"><div class="behavior-score bs${n}">${n}</div><div class="behavior-text">${beh[n]||''}</div></div>`).join('')}
+      </div>` : '';
+    row.innerHTML = `
+      <div class="score-top">
+        <div>
+          <div class="score-skill">${sk.name}${iS?`<span class="diff-badge diff-eq">面試：${iS}</span>`:''}</div>
+          <div class="score-concept">${sk.concepts}</div>
+        </div>
+      </div>
+      ${behHtml}
+      <div class="rating-wrap">
+        ${[1,2,3,4].map(n=>`<button class="rating-btn${pS===n?' a'+n:''}" onclick="setProbScore('${sk.id}',${n},this)">${n}</button>`).join('')}
+      </div>
+      <div class="rating-labels"><span>待發展</span><span>發展中</span><span>符合期待</span><span>超越期待</span></div>
+      <textarea class="score-note-input" rows="2" placeholder="具體事例、觀察備註..." oninput="setProbNote('${sk.id}',this.value)">${note}</textarea>`;
+    c.appendChild(row);
+  });
+  updateProbStats(j);
+}
+
+function setProbScore(id, score, btn){
+  const j = curJob(); if (!j) return;
+  if (!j.probation) j.probation = { scores:{}, notes:{} };
+  j.probation.scores[id] = score;
+  const grp = btn.closest('.rating-wrap');
+  grp.querySelectorAll('.rating-btn').forEach(b => { b.className='rating-btn'; });
+  btn.classList.add('a'+score);
+  updateProbStats(j);
+}
+function setProbNote(id, val){
+  const j = curJob(); if (!j) return;
+  if (!j.probation) j.probation = { scores:{}, notes:{} };
+  j.probation.notes[id] = val;
+}
+function updateProbStats(j){
+  const skills = getSelSkillObjs(j);
+  const r1 = j.applicants?.[0]?.rounds?.[1] || {};
+  const prob = j.probation || {};
+  const iScores = skills.map(s => r1.scores?.[s.id]).filter(Boolean);
+  const pScores = skills.map(s => prob.scores?.[s.id]).filter(Boolean);
+  const iAvg = iScores.length ? (iScores.reduce((a,b)=>a+b,0)/iScores.length).toFixed(1) : '—';
+  const pAvg = pScores.length ? (pScores.reduce((a,b)=>a+b,0)/pScores.length).toFixed(1) : '—';
+  const diff = (iAvg!=='—'&&pAvg!=='—') ? (parseFloat(pAvg)-parseFloat(iAvg)).toFixed(1) : '—';
+  document.getElementById('st-int').textContent = iAvg;
+  document.getElementById('st-prob').textContent = pAvg;
+  document.getElementById('st-diff').textContent = diff!=='—' ? (parseFloat(diff)>0?'+'+diff:diff) : '—';
+}
+function syncProbation(){
+  const j = curJob(); if (!j) return;
+  if (!j.probation) j.probation = { scores:{}, notes:{} };
+  j.probation.selfComment = document.getElementById('p-self').value;
+  j.probation.mgrComment  = document.getElementById('p-mgr-comment').value;
+  j.probation.result       = document.getElementById('p-result').value;
+  j.status = 'probation';
+  renderJobList();
+}
+
+// ══ REPORTS ═══════════════════════════════════════════════════
+function sc(s){ return s===1?'pv-s1':s===2?'pv-s2':s===3?'pv-s3':s===4?'pv-s4':'pv-s0'; }
+
+function buildInterviewReport(){
+  const j = curJob(); if (!j) return;
+  const skills = getSelSkillObjs(j);
+  const r1 = j.applicants?.[0]?.rounds?.[1] || {};
+  const cand = j.applicants?.[0]?.name || '應徵者';
+
+  document.getElementById('pvr-title').textContent = `面試評估報告 — ${cand}`;
+  document.getElementById('pvr-candidate').textContent = cand;
+  document.getElementById('pvr-job').textContent = j.title || '—';
+  document.getElementById('pvr-dept').textContent = j.dept || '—';
+  document.getElementById('pvr-level').textContent = j.roleKey ? `${j.roleKey} ${(j.level||'').split(' ').slice(1).join(' ')}` : '—';
+  document.getElementById('pvr-mgr').textContent = j.mgr || '—';
+  document.getElementById('pvr-date').textContent = r1.date || '—';
+
+  // Rounds
+  const rSec = document.getElementById('pvr-rounds');
+  rSec.innerHTML = '<div class="doc-sec-hd">各關面試紀錄</div>';
+  const rNames = {1:'第一關面試',2:'第二關面試',3:'HR 面試'};
+  [1,2,3].forEach(rn => {
+    const r = j.applicants?.[0]?.rounds?.[rn] || {};
+    if (!r.date && !r.interviewer && !r.comment && !r.result) return;
+    const box = document.createElement('div');
+    box.style.cssText = 'padding:10px 13px;border-radius:var(--r);background:var(--paper2);margin-bottom:8px;border-left:3px solid #F59E0B';
+    box.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:5px">${rNames[rn]}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:12px;color:var(--ink2)">
+        <div>日期：<strong>${r.date||'—'}</strong></div>
+        <div>面試官：<strong>${r.interviewer||'—'}</strong></div>
+        <div>建議：<strong style="color:${r.result==='推薦進下一關'||r.result==='錄取'?'var(--green)':r.result==='不推薦'?'var(--red)':'var(--ink)'}">${r.result||'—'}</strong></div>
+      </div>
+      ${r.comment?`<div style="font-size:12px;color:var(--ink2);margin-top:7px;line-height:1.65">${r.comment}</div>`:''}`;
+    rSec.appendChild(box);
+  });
+
+  // Skills
+  const sc_el = document.getElementById('pvr-skills'); sc_el.innerHTML = '';
+  let iTotal=0, iCnt=0;
+  skills.forEach(sk => {
+    const s = r1.scores?.[sk.id] || 0;
+    const note = r1.notes?.[sk.id] || '';
+    if (s) { iTotal+=s; iCnt++; }
+    const d = document.createElement('div');
+    d.className = 'pv-skill-row';
+    d.innerHTML = `<div><div class="pv-skill-name">${sk.name}</div><div class="pv-skill-concept">${sk.concepts}</div>${note?`<div class="pv-note">${note}</div>`:''}</div><div class="pv-score ${sc(s)}">${s||'—'}</div>`;
+    sc_el.appendChild(d);
+  });
+  document.getElementById('pvr-avg').textContent = iCnt ? (iTotal/iCnt).toFixed(1) : '—';
+}
+
+function buildProbReport(){
+  const j = curJob(); if (!j) return;
+  syncProbation();
+  const skills = getSelSkillObjs(j);
+  const r1 = j.applicants?.[0]?.rounds?.[1] || {};
+  const prob = j.probation || {};
+  const pName = document.getElementById('p-name').value || j.applicants?.[0]?.name || '—';
+
+  document.getElementById('pv4-title').textContent = `試用期考核報告 — ${pName}`;
+  document.getElementById('pv4-name').textContent = pName;
+  document.getElementById('pv4-job').textContent = j.title || '—';
+  document.getElementById('pv4-dept').textContent = j.dept || '—';
+  document.getElementById('pv4-level').textContent = j.roleKey ? `${j.roleKey} ${(j.level||'').split(' ').slice(1).join(' ')}` : '—';
+  document.getElementById('pv4-mgr').textContent = document.getElementById('p-mgr-name').value || j.mgr || '—';
+  const pResult = prob.result || '';
+  const resultEl = document.getElementById('pv4-result');
+  resultEl.textContent = pResult || '—';
+  resultEl.style.color = pResult==='通過試用'?'var(--green)':pResult==='不通過'?'var(--red)':'var(--gold)';
+
+  const comp = document.getElementById('pv4-comparison'); comp.innerHTML = '';
+  let iTotal=0,iCnt=0,pTotal=0,pCnt=0;
+  skills.forEach(sk => {
+    const iS = r1.scores?.[sk.id] || 0;
+    const pS = prob.scores?.[sk.id] || 0;
+    const note = prob.notes?.[sk.id] || '';
+    if (iS) { iTotal+=iS; iCnt++; }
+    if (pS) { pTotal+=pS; pCnt++; }
+    const diff = (iS&&pS) ? pS-iS : null;
+    const diffHtml = diff===null ? '<span style="color:var(--ink3);font-size:11px">—</span>' :
+      diff>0 ? `<span class="diff-badge diff-up">+${diff}</span>` :
+      diff<0 ? `<span class="diff-badge diff-dn">${diff}</span>` :
+      `<span class="diff-badge diff-eq">持平</span>`;
+    const d = document.createElement('div');
+    d.className = 'cmp-row';
+    d.innerHTML = `<div><div style="font-size:13px;font-weight:600;color:var(--ink)">${sk.name}</div>${note?`<div style="font-size:11px;color:var(--ink3);font-style:italic;margin-top:1px">${note}</div>`:''}</div>
+      <div class="cmp-cell"><div class="pv-score ${sc(iS)}">${iS||'—'}</div></div>
+      <div class="cmp-cell"><div class="pv-score ${sc(pS)}">${pS||'—'}</div></div>
+      <div class="cmp-cell">${diffHtml}</div>`;
+    comp.appendChild(d);
+  });
+
+  const iAvg = iCnt?(iTotal/iCnt).toFixed(1):'—';
+  const pAvg = pCnt?(pTotal/pCnt).toFixed(1):'—';
+  const diffAvg = (iAvg!=='—'&&pAvg!=='—')?(parseFloat(pAvg)-parseFloat(iAvg)).toFixed(1):'—';
+  document.getElementById('pv4-int-avg').textContent = iAvg;
+  document.getElementById('pv4-prob-avg').textContent = pAvg;
+  const da = document.getElementById('pv4-diff-avg');
+  da.textContent = diffAvg!=='—'?(parseFloat(diffAvg)>0?'+'+diffAvg:diffAvg):'—';
+  da.style.color = diffAvg!=='—'?(parseFloat(diffAvg)>0?'var(--green)':parseFloat(diffAvg)<0?'var(--red)':'var(--ink3)'):'var(--ink3)';
+
+  document.getElementById('pv4-self').textContent = prob.selfComment || '（未填寫）';
+  document.getElementById('pv4-mgr-comment').textContent = prob.mgrComment || '（未填寫）';
+}
+
+// ══ EXPORT / IMPORT ═══════════════════════════════════════════
+function exportData(){
+  const data = JSON.parse(JSON.stringify(DB));
+  // Convert Sets to arrays for JSON
+  data.jobs.forEach(j => {
+    if (j.selSkills instanceof Set) j.selSkills = [...j.selSkills];
+    else if (j.selSkills) j.selSkills = [...j.selSkills];
+  });
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `巨思職能盤點_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  showToast('✓ 已匯出存檔', 'green');
+}
+
+function importData(e){
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      DB = data;
+      DB.jobs.forEach(j => { j.selSkills = new Set(j.selSkills || []); });
+      CJ = DB.jobs.length ? 0 : null;
+      CA = 0; CR = 1;
+      renderJobList();
+      if (CJ !== null) { loadJobToForm(); goTo(1); }
+      else { goTo(0); }
+      showToast('✓ 紀錄已載入', 'green');
+    } catch {
+      showToast('檔案格式錯誤，請選擇正確的 JSON 存檔');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ══ DELETE ════════════════════════════════════════════════════
+function confirmDeleteJob(){ document.getElementById('delete-modal').classList.add('open'); }
+function closeModal(){ document.getElementById('delete-modal').classList.remove('open'); }
+function deleteJob(){
+  if (CJ === null) { closeModal(); return; }
+  DB.jobs.splice(CJ, 1);
+  CJ = DB.jobs.length ? 0 : null;
+  CA = 0; CR = 1;
+  closeModal();
+  renderJobList();
+  if (CJ !== null) { loadJobToForm(); goTo(1); }
+  else { goTo(0); }
+  showToast('職缺已刪除');
+}
+
+// ══ NAVIGATION ════════════════════════════════════════════════
+function goTo(n){
+  if (n===2) { buildApplicantTabs(); buildScoreRows(); }
+  if (n==='r') buildInterviewReport();
+  if (n===3) buildProbRows();
+  if (n===4) buildProbReport();
+
+  curPage = n;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${n}`).classList.add('active');
+
+  const order = {'0':-1,'1':0,'2':1,'r':2,'3':3,'4':4};
+  const cur = order[String(n)] ?? 0;
+  const pills = [['pill-1',0],['pill-2',1],['pill-r',2],['pill-3',3],['pill-4',4]];
+  pills.forEach(([pid, idx]) => {
+    const p = document.getElementById(pid); if (!p) return;
+    p.classList.remove('active','done');
+    if (idx === cur) p.classList.add('active');
+    else if (idx < cur) p.classList.add('done');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function refreshCurrentPage(){
+  if (curPage === 1) loadJobToForm();
+  else if (curPage === 2) { buildApplicantTabs(); buildScoreRows(); loadApplicantToForm(); }
+  else if (curPage === 3) buildProbRows();
+}
+
+// ══ TOAST ════════════════════════════════════════════════════
+function showToast(msg, type=''){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type==='green'?' green':'');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = 'toast'; }, 2800);
+}
+
+// ══ INIT ════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  renderJobList();
+  // Add input listeners for probation sync
+  ['p-self','p-mgr-comment','p-result'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', syncProbation);
+    if (el) el.addEventListener('change', syncProbation);
+  });
+});
+// ══ 登入 / 登出 ════════════════════════════════════════
+function showLogin(){
+  document.getElementById('login-page').style.display = 'flex';
+  document.getElementById('register-page').style.display = 'none';
+}
+function showRegister(){
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('register-page').style.display = 'flex';
+}
+
+async function doLogin(){
+  const email    = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl    = document.getElementById('login-error');
+  errEl.style.display = 'none';
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    errEl.textContent = '登入失敗：' + (error.message === 'Invalid login credentials' ? '信箱或密碼錯誤' : error.message);
+    errEl.style.display = 'block';
+    return;
+  }
+  await initApp(data.user);
+}
+
+async function doRegister(){
+  const name     = document.getElementById('reg-name').value.trim();
+  const email    = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const errEl    = document.getElementById('register-error');
+  const sucEl    = document.getElementById('register-success');
+  errEl.style.display = 'none'; sucEl.style.display = 'none';
+
+  if (!name || !email || !password) {
+    errEl.textContent = '請填寫所有欄位'; errEl.style.display = 'block'; return;
+  }
+  const { error } = await sb.auth.signUp({
+    email, password,
+    options: { data: { name } }
+  });
+  if (error) {
+    errEl.textContent = '申請失敗：' + error.message; errEl.style.display = 'block'; return;
+  }
+  sucEl.textContent = '申請成功！請檢查信箱並點擊驗證連結，再回來登入。';
+  sucEl.style.display = 'block';
+}
+
+async function doLogout(){
+  await sb.auth.signOut();
+  currentUser = null; currentUserRole = null;
+  DB = { jobs: [] }; CJ = null;
+  document.getElementById('nav-user').textContent = '';
+  renderJobList();
+  showLogin();
+}
+
+async function initApp(user){
+  currentUser = user;
+  // 取得角色
+  const { data: roleData } = await sb.from('user_roles').select('*').eq('id', user.id).single();
+  currentUserRole = roleData?.role || 'manager';
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('register-page').style.display = 'none';
+  document.getElementById('nav-user').textContent =
+    (roleData?.name || user.email) + (currentUserRole === 'hr' ? ' · HR' : ' · 主管');
+  await loadAllJobs();
+}
+
+// ══ 資料讀寫（取代原本的本機 DB 操作）══════════════════
+async function loadAllJobs(){
+  showToast('載入資料中…');
+  const { data, error } = await sb.from('jobs').select('*').order('created_at', { ascending: false });
+  if (error) { showToast('載入失敗：' + error.message); return; }
+
+  DB.jobs = (data || []).map(j => ({
+    ...j,
+    selSkills:    new Set(j.sel_skills    || []),
+    customSkills: j.custom_skills || [],
+    applicants:   [],          // 按需載入
+    probation:    null
+  }));
+
+  CJ = DB.jobs.length ? 0 : null;
+  renderJobList();
+  if (CJ !== null) { loadJobToForm(); goTo(1); }
+  else { goTo(0); }
+  showToast('');
+}
+
+async function saveJob(){
+  const j = curJob(); if (!j) return;
+  const payload = {
+    title:         j.title || '',
+    dept:          j.dept  || '',
+    series:        j.series,
+    role_key:      j.roleKey,
+    level_label:   j.level,
+    mgr_id:        currentUser.id,
+    method:        j.method || '對外徵才',
+    open_date:     j.date  || '',
+    resp_text:     j.resp  || '',
+    jd:            j.jd    || '',
+    status:        j.status || 'draft',
+    sel_skills:    j.selSkills instanceof Set ? [...j.selSkills] : (j.selSkills || []),
+    custom_skills: j.customSkills || [],
+    created_by:    currentUser.id
+  };
+
+  if (j.id && !j.id.startsWith('local_')) {
+    // 更新
+    const { error } = await sb.from('jobs').update(payload).eq('id', j.id);
+    if (error) { showToast('儲存失敗：' + error.message); return; }
+  } else {
+    // 新增
+    const { data, error } = await sb.from('jobs').insert(payload).select().single();
+    if (error) { showToast('儲存失敗：' + error.message); return; }
+    j.id = data.id;
+  }
+  showToast('✓ 已儲存', 'green');
+  renderJobList();
+}
+
+async function loadApplicantsForJob(jobId){
+  const { data } = await sb.from('candidates').select('*').eq('job_id', jobId).order('created_at');
+  if (!data) return [];
+
+  const applicants = [];
+  for (const c of data) {
+    const { data: interviews } = await sb.from('interviews')
+      .select('*').eq('candidate_id', c.id).order('round');
+    const rounds = { 1:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''},
+                     2:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''},
+                     3:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''} };
+    (interviews || []).forEach(iv => {
+      rounds[iv.round] = {
+        id: iv.id,
+        date: iv.interview_date || '',
+        interviewer: iv.interviewer || '',
+        scores: iv.scores || {},
+        notes: iv.notes || {},
+        comment: iv.comment || '',
+        result: iv.result || ''
+      };
+    });
+    applicants.push({ id: c.id, name: c.name, status: c.status, rounds });
+  }
+  return applicants;
+}
+
+async function saveInterview(){
+  const j = curJob(); if (!j || !j.applicants) return;
+  const a = j.applicants[CA]; if (!a) return;
+  const r = a.rounds[CR]; if (!r) return;
+  syncRound();
+
+  const payload = {
+    candidate_id:   a.id,
+    job_id:         j.id,
+    round:          CR,
+    interview_date: r.date,
+    interviewer:    r.interviewer,
+    scores:         r.scores,
+    notes:          r.notes,
+    comment:        r.comment,
+    result:         r.result,
+    created_by:     currentUser.id
+  };
+
+  if (r.id) {
+    await sb.from('interviews').update(payload).eq('id', r.id);
+  } else {
+    const { data } = await sb.from('interviews').insert(payload).select().single();
+    if (data) r.id = data.id;
+  }
+  showToast('✓ 面試紀錄已儲存', 'green');
+}
+
+async function saveProbation(){
+  const j = curJob(); if (!j) return;
+  syncProbation();
+  const prob = j.probation || {};
+  const cand = j.applicants?.[0];
+  if (!cand) { showToast('請先建立應徵者'); return; }
+
+  const payload = {
+    candidate_id: cand.id,
+    job_id:       j.id,
+    scores:       prob.scores || {},
+    notes:        prob.notes  || {},
+    self_comment: prob.selfComment || '',
+    mgr_comment:  prob.mgrComment  || '',
+    result:       prob.result       || '',
+    created_by:   currentUser.id
+  };
+
+  if (prob.id) {
+    await sb.from('probations').update(payload).eq('id', prob.id);
+  } else {
+    const { data } = await sb.from('probations').insert(payload).select().single();
+    if (data) prob.id = data.id;
+  }
+  showToast('✓ 考核紀錄已儲存', 'green');
+}
+
+// ══ 覆寫需要改變行為的函式 ══════════════════════════════
+
+// addJob 改為建立本地暫存，儲存後才寫到 Supabase
+const _origAddJob = addJob;
+window.addJob = function(){
+  DB.jobs.unshift({
+    id: 'local_' + Date.now(),
+    title:'', dept:'', mgr:'', method:'對外徵才', date:'', jd:'',
+    series:null, level:null, roleKey:null,
+    selSkills: new Set(), customSkills:[],
+    applicants:[], probation:null, status:'draft'
+  });
+  CJ = 0; CA = 0; CR = 1;
+  renderJobList(); loadJobToForm(); goTo(1);
+};
+
+// syncJobMeta 同步後自動儲存
+const _origSyncJobMeta = syncJobMeta;
+window.syncJobMeta = function(){
+  _origSyncJobMeta();
+  clearTimeout(window._saveTimer);
+  window._saveTimer = setTimeout(saveJob, 1500); // 停止輸入 1.5 秒後自動儲存
+};
+
+// toPage2 改為先載入應徵者資料
+const _origToPage2 = toPage2;
+window.toPage2 = async function(){
+  const j = curJob();
+  if (!j) return;
+  if (!j.series || !j.level) { showToast('請先選擇序列與職級'); return; }
+  const sel = j.selSkills instanceof Set ? j.selSkills : new Set(j.selSkills);
+  if (!sel.size) { showToast('請至少選擇一項技能'); return; }
+
+  // 確保 job 已存到 Supabase
+  await saveJob();
+
+  // 載入應徵者
+  if (!j.applicants || !j.applicants.length) {
+    j.applicants = await loadApplicantsForJob(j.id);
+    if (!j.applicants.length) {
+      // 新增第一位應徵者（暫存，尚未寫入DB）
+      j.applicants = [{ id: null, name:'', rounds:{
+        1:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''},
+        2:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''},
+        3:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''}
+      }}];
+    }
+  }
+  CA = 0; CR = 1;
+  buildApplicantTabs(); loadApplicantToForm(); buildScoreRows(); goTo(2);
+};
+
+// syncApplicant 自動儲存應徵者姓名
+const _origSyncApplicant = syncApplicant;
+window.syncApplicant = async function(){
+  _origSyncApplicant();
+  const j = curJob(); if (!j) return;
+  const a = j.applicants[CA]; if (!a) return;
+  if (!a.id) {
+    // 第一次建立
+    const { data } = await sb.from('candidates')
+      .insert({ job_id: j.id, name: a.name, created_by: currentUser.id })
+      .select().single();
+    if (data) a.id = data.id;
+  } else {
+    await sb.from('candidates').update({ name: a.name }).eq('id', a.id);
+  }
+  buildApplicantTabs();
+};
+
+// 在 Nav 加「儲存」按鈕動作
+window.manualSave = async function(){
+  await saveJob();
+  await saveInterview();
+};
+
+// ══ 啟動：檢查是否已登入 ══════════════════════════════
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) {
+    await initApp(session.user);
+  } else {
+    showLogin();
+  }
+})();
+</script>
+</body>
+</html>
