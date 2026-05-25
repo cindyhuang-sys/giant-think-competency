@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>巨思文化 · 職能盤點系統</title>
+<title>BNEXT · 職能盤點系統</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -289,7 +289,7 @@ let currentUserRole = null;
 <!-- 登入頁 -->
 <div id="login-page" style="position:fixed;inset:0;background:#FAFAF8;display:flex;align-items:center;justify-content:center;z-index:1000">
   <div style="background:#FFF;border:1px solid #E2DDD8;border-radius:16px;padding:40px;width:380px;max-width:90vw;box-shadow:0 4px 20px rgba(0,0,0,.08)">
-    <div style="font-family:'Noto Serif TC',serif;font-size:22px;font-weight:700;color:#1C1917;margin-bottom:6px">巨<span style="color:#F59E0B">思</span> · 職能盤點</div>
+    <div style="font-family:'Noto Serif TC',serif;font-size:22px;font-weight:700;color:#1C1917;margin-bottom:6px">B<span style="color:#F59E0B">NEXT</span> · 職能盤點</div>
     <div style="font-size:13px;color:#A8A29E;margin-bottom:28px">請登入您的帳號</div>
     <div id="login-error" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;font-size:13px;color:#B91C1C;margin-bottom:16px"></div>
     <div style="margin-bottom:14px">
@@ -331,7 +331,7 @@ let currentUserRole = null;
   </div>
 </div>
 <nav class="nav">
-  <div class="nav-brand">巨<span>思</span> · 職能盤點</div>
+  <div class="nav-brand">B<span>NEXT</span> · 職能盤點</div>
   <div class="nav-track">
     <span class="nav-track-label">TRACK A</span>
     <button class="nav-step active" id="pill-1" onclick="goTo(1)">增補開缺</button>
@@ -345,9 +345,6 @@ let currentUserRole = null;
     <button class="nav-step" id="pill-4" onclick="goTo(4)">考核報告</button>
   </div>
   <div class="nav-right"><span id="nav-user" style="font-size:12px;color:rgba(255,255,255,.5);margin-right:4px"></span><button class="nav-btn" onclick="doLogout()">登出</button>
-    <button class="nav-btn" onclick="exportData()">↓ 匯出存檔</button>
-    <button class="nav-btn primary" onclick="document.getElementById('import-input').click()">↑ 載入紀錄</button>
-    <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
   </div>
 </nav>
 
@@ -519,7 +516,7 @@ let currentUserRole = null;
         </div>
       </div>
       <div class="preview-doc">
-        <div class="doc-logo">GIANT THINK · 巨思文化</div>
+        <div class="doc-logo">BNEXT · 巨思文化</div>
         <div class="doc-title" id="pvr-title">面試評估報告</div>
         <div class="doc-meta">
           <div class="doc-meta-item">應徵者：<span id="pvr-candidate">—</span></div>
@@ -602,7 +599,7 @@ let currentUserRole = null;
         <button class="btn btn-ghost" onclick="window.print()">🖨 列印 / 存 PDF</button>
       </div>
       <div class="preview-doc">
-        <div class="doc-logo">GIANT THINK · 巨思文化</div>
+        <div class="doc-logo">BNEXT · 巨思文化</div>
         <div class="doc-title" id="pv4-title">試用期考核報告</div>
         <div class="doc-meta">
           <div class="doc-meta-item">員工姓名：<span id="pv4-name">—</span></div>
@@ -2025,13 +2022,20 @@ async function loadApplicantsForJob(jobId){
 async function saveInterview(){
   const j=curJob();if(!j||!j.applicants)return;
   const a=j.applicants[CA];if(!a){showToast('請先建立應徵者');return;}
-  if(!a.id&&a.name&&j.id&&!String(j.id).startsWith('local_')){
-    const {data}=await sb.from('candidates')
+  // 確保 job 已存到資料庫
+  if(!j.id||String(j.id).startsWith('local_')) await saveJob();
+  // 自動建立應徵者
+  if(!a.id){
+    const name=document.getElementById('a-name').value.trim();
+    if(!name){showToast('請先填寫應徵者姓名');return;}
+    a.name=name;
+    const {data,error}=await sb.from('candidates')
       .insert({job_id:j.id,name:a.name,created_by:currentUser.id})
       .select().single();
+    if(error){showToast('儲存失敗：'+error.message);return;}
     if(data)a.id=data.id;
   }
-  if(!a.id){showToast('請先填寫應徵者姓名');return;}
+  if(!a.id){showToast('應徵者建立失敗，請重試');return;}
   syncRound();
   const r=a.rounds[CR];
   const payload={
@@ -2053,8 +2057,28 @@ async function saveProbation(){
   const j=curJob();if(!j)return;
   syncProbation();
   const prob=j.probation||{};
-  const cand=j.applicants?.[0];
-  if(!cand||!cand.id){showToast('請先建立應徵者資料');return;}
+  if(!j.applicants||!j.applicants.length){
+    j.applicants=[{id:null,name:document.getElementById('p-name').value.trim(),rounds:{
+      1:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''},
+      2:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''},
+      3:{date:'',interviewer:'',scores:{},notes:{},comment:'',result:''}
+    }}];
+  }
+  let cand=j.applicants[0];
+  // 確保 job 已存到資料庫
+  if(!j.id||String(j.id).startsWith('local_')) await saveJob();
+  // 自動建立應徵者
+  if(!cand.id){
+    const name=document.getElementById('p-name').value.trim()||cand.name||'';
+    if(!name){showToast('請先填寫員工姓名');return;}
+    cand.name=name;
+    const {data,error}=await sb.from('candidates')
+      .insert({job_id:j.id,name:cand.name,created_by:currentUser.id})
+      .select().single();
+    if(error){showToast('儲存失敗：'+error.message);return;}
+    if(data)cand.id=data.id;
+  }
+  if(!cand.id){showToast('應徵者建立失敗，請重試');return;}
   const payload={
     candidate_id:cand.id,job_id:j.id,
     scores:prob.scores||{},notes:prob.notes||{},
